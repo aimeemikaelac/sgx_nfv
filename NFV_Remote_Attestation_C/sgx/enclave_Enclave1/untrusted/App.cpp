@@ -90,7 +90,7 @@ void ocall_print_hexbyte(unsigned char byteval){
 	printf("%02x", byteval);
 }
 
-int perform_remote_attestation(){
+int perform_remote_attestation(const char* server_url){
 	sgx_ra_context_t context;
 	sgx_status_t status = SGX_SUCCESS;
 	int ret;
@@ -129,6 +129,13 @@ int perform_remote_attestation(){
     p_msg0_full->type = TYPE_RA_MSG0;
     p_msg0_full->size = sizeof(uint32_t);
     memcpy(p_msg0_full->body, &extended_epid_group_id, sizeof(uint32_t));
+
+    printf("Sending msg0\n");
+    ret = ra_network_send_receive(server_url, p_msg0_full, &p_msg0_resp_full);
+    if(ret != 0){
+        printf("Sending message 1 failed");
+        return -1;
+    }
 
 	//4. get msg1 from enclave, send to verifier
     //TODO: send message over network to verifier

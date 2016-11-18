@@ -29,69 +29,86 @@
  *
  */
 
+#ifndef _ECP_H
+#define _ECP_H
 
+#include <stdint.h>
+#include <stdlib.h>
 
-#ifndef _NETWORK_RA_H
-#define _NETWORK_RA_H
+#include "remote_attestation_result.h"
 
-//borrowed from Intel RA sample code:
-//https://github.com/01org/linux-sgx/blob/master/SampleCode/RemoteAttestation/service_provider/network_ra.h
+#ifndef SAMPLE_FEBITSIZE
+    #define SAMPLE_FEBITSIZE                    256
+#endif
 
-/* Enum for all possible message types between the ISV app and
- * the ISV SP. Requests and responses in the remote attestation
- * sample.
- */
-typedef enum _ra_msg_type_t
+#define SAMPLE_ECP_KEY_SIZE                     (SAMPLE_FEBITSIZE/8)
+
+typedef struct sample_ec_priv_t
 {
-     TYPE_RA_MSG0,
-     TYPE_RA_MSG1,
-     TYPE_RA_MSG2,
-     TYPE_RA_MSG3,
-     TYPE_RA_ATT_RESULT,
-}ra_msg_type_t;
+    uint8_t r[SAMPLE_ECP_KEY_SIZE];
+} sample_ec_priv_t;
 
-/* Enum for all possible message types between the SP and IAS.
- * Network communication is not simulated in the remote
- * attestation sample.  Currently these aren't used.
- */
-typedef enum _ias_msg_type_t
+typedef struct sample_ec_dh_shared_t
 {
-     TYPE_IAS_ENROLL,
-     TYPE_IAS_GET_SIGRL,
-     TYPE_IAS_SIGRL,
-     TYPE_IAS_ATT_EVIDENCE,
-     TYPE_IAS_ATT_RESULT,
-}ias_msg_type_t;
+    uint8_t s[SAMPLE_ECP_KEY_SIZE];
+}sample_ec_dh_shared_t;
 
-#pragma pack(1)
-typedef struct _ra_samp_request_header_t{
-    uint8_t  type;     /* set to one of ra_msg_type_t*/
-    uint32_t size;     /*size of request body*/
-    uint8_t  align[3];
-    uint8_t body[];
-}ra_samp_request_header_t;
+typedef uint8_t sample_ec_key_128bit_t[16];
 
-typedef struct _ra_samp_response_header_t{
-    uint8_t  type;      /* set to one of ra_msg_type_t*/
-    uint8_t  status[2];
-    uint32_t size;      /*size of the response body*/
-    uint8_t  align[1];
-    uint8_t  body[];
-}ra_samp_response_header_t;
-
-#pragma pack()
+#define SAMPLE_EC_MAC_SIZE 16
 
 #ifdef  __cplusplus
 extern "C" {
 #endif
 
-int ra_network_send_receive(const char *server_url,
-                            const ra_samp_request_header_t *req,
-                            ra_samp_response_header_t **p_resp);
-void ra_free_network_response_buffer(ra_samp_response_header_t *resp);
 
+#ifndef _ERRNO_T_DEFINED
+#define _ERRNO_T_DEFINED
+typedef int errno_t;
+#endif
+errno_t memcpy_s(void *dest, size_t numberOfElements, const void *src,
+                 size_t count);
+
+
+#ifdef SUPPLIED_KEY_DERIVATION
+
+typedef enum _sample_derive_key_type_t
+{
+    SAMPLE_DERIVE_KEY_SMK_SK = 0,
+    SAMPLE_DERIVE_KEY_MK_VK,
+} sample_derive_key_type_t;
+
+bool derive_key(
+    const sample_ec_dh_shared_t *p_shared_key,
+    uint8_t key_id,
+    sample_ec_key_128bit_t *first_derived_key,
+    sample_ec_key_128bit_t *second_derived_key);
+
+#else
+
+typedef enum _sample_derive_key_type_t
+{
+    SAMPLE_DERIVE_KEY_SMK = 0,
+    SAMPLE_DERIVE_KEY_SK,
+    SAMPLE_DERIVE_KEY_MK,
+    SAMPLE_DERIVE_KEY_VK,
+} sample_derive_key_type_t;
+
+bool derive_key(
+    const sample_ec_dh_shared_t *p_shared_key,
+    uint8_t key_id,
+    sample_ec_key_128bit_t *derived_key);
+
+#endif
+
+bool verify_cmac128(
+    sample_ec_key_128bit_t mac_key,
+    const uint8_t *p_data_buf,
+    uint32_t buf_size,
+    const uint8_t *p_mac_buf);
 #ifdef  __cplusplus
 }
 #endif
 
 #endif
+
