@@ -1,0 +1,42 @@
+/* Enclave1.edl - Top EDL file. */
+
+enclave {
+	from "sgx_tkey_exchange.edl" import *;
+
+    include "sgx_key_exchange.h"
+    include "sgx_trts.h"
+    
+    /* 
+     * ocall_Enclave1_sample - invokes OCALL to display string buffer inside the enclave.
+     *  [in]: copy the string buffer to App outside.
+     *  [string]: specifies 'str' is a NULL terminated buffer.
+     */
+    untrusted {
+        //void ocall_Enclave1_sample([in, string] const char *str);
+        /* define OCALLs here. */
+        void ocall_print([in, string]const char* str);
+        void ocall_print_hexbyte(unsigned char byteval);
+    };
+
+
+    trusted {
+    	    //public int ecall_Enclave1_sample();
+    	    /* define ECALLs here. */
+	        public int generate_random_number(void);
+	        public int generate_key_pair(void);
+	        
+	        //remote attestation functions
+	        public sgx_status_t enclave_init_ra(int b_pse,
+	                                            [out] sgx_ra_context_t *p_context);
+	        public sgx_status_t enclave_ra_close(sgx_ra_context_t context);
+	        public sgx_status_t verify_att_result_mac(sgx_ra_context_t context,
+	                                                  [in,size=message_size] uint8_t* message, 
+	                                                  size_t message_size, 
+	                                                  [in,size=mac_size] uint8_t* mac, 
+	                                                  size_t mac_size);
+	        public sgx_status_t put_secret_data(sgx_ra_context_t context,  
+	                                            [in,size=secret_size] uint8_t* p_secret,
+	                                            uint32_t secret_size,
+	                                            [in,count=16] uint8_t* gcm_mac);
+    };
+};
