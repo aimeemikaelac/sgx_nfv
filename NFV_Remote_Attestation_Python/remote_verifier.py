@@ -2,64 +2,27 @@ import socket
 import struct
 import array
 # need to install the backported enum for this
-from enum import enum
+from enum import Enum
+from service_provider_util import *
 
 request_struct_size = (8 + 32 + 3*8)/8
 
 IS_SP_REGISTERED = False
-GLOBAL_SP_EXTENDED_EPID_GROUP = SP_Extended_EPID_GROUP()
+GLOBAL_SP_EXTENDED_EPID_GROUP = SP_Extended_EPID_Group()
 GLOBAL_AUTHENTICATION_TOKEN = 0
 GLOBAL_SP_CREDENTIALS = 0
 
-class Service_Provider_ID():
-    def __init__():
-        #initialize a zeroed 16 byte array
-        self.id = array.array('B')
-        for i in range(16):
-            self.id.append(0)
+GLOBAL_CLIENT_PUBLIC_KEY = None
 
-class SP_Extended_EPID_Group():
-    def __init__():
-        self.group = -1
-        self.spid = Service_Provider_ID()
-
-    def enroll(sp_credentials, p_spid):
-        '''
-        Enroll with the attestation service. For now, just simulate
-        
-        sp_credentials (int): service provider credentials
-        p_spid (Service_Provider_ID): service provider ID - a 16-byte char array
-
-        Returns:
-            return_code (int): 0 if error, 1 otherwise
-            authentication_token (int): simulation authentication token - 0 for now, since we don't use it yet
-        '''
-        #TODO: implement actual enrollment process. For now, use the simulation enrollment
-        self.spid = p_spid
-        return 0,0
-
-
-
-class RA_MSG_TYPE(Enum):
-    TYPE_RA_MSG0 = 0
-    TYPE_RA_MSG1 = 1
-    TYPE_RA_MSG2 = 2
-    TYPE_RA_MSG3 = 3
-    TYPE_RA_ATT_RESULT = 4
-
-def RA_SAMP_RESPONSE():
-    def __init__(message_type, status, body):
-        self.message_type = message_type
-	self.status= status
-	self.body = body
+ECP_KEY_SIZE = 256/8
 
 def ra_proc_msg0_req(request_body):
     '''
-    Sample processing of SGX msg0. Since enrollment is not implemented, just return 0
+    Sample processing of SGX msg0    . Since enrollment is not implemented, just return 0
     for most things
     '''
     extended_epid_group_id = struct.unpack('I', request_body)
-    if not IS_SP_REGISTERED or extended_epid_group is not SP_EXTENDED_EPID_GROUP:
+    if not IS_SP_REGISTERED or extended_epid_group_id is not GLOBAL_SP_EXTENDED_EPID_GROUP:
         ret, GLOBAL_AUTHENTICATION_TOKEN = GLOBAL_SP_EXTENDED_EPID_GROUP.enroll(GLOBAL_SP_CREDENTIALS, GLOBAL_AUTHENTICATION_TOKEN)
         if ret is not 0:
             return -1
@@ -70,6 +33,16 @@ def ra_proc_msg0_req(request_body):
         return 0
 
 def ra_proc_msg1_req(request_body):
+    if not IS_SP_REGISTERED:
+        return -1
+    ga_x, ga_y, gid = struct.unpack('{}s{}s4s', request_body)
+    ret, sig_rl = GLOBAL_SP_EXTENDED_EPID_GROUP.get_sigrl(gid)
+    if ret is not 0:
+        return -1
+    
+    GLOBAL_CLIENT_PUBLIC_KEY = ECCDH_Public_Key(ga_x, ga_y)
+    
+    
     return 0, RA_SAMP_RESPONSE()
 
 def ra_proc_msg3_req(request_body):
