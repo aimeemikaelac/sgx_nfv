@@ -51,6 +51,10 @@ class ECCDH_Public_Key():
     def __init__(self, x, y):
         self.x = x
         self.y = y
+        
+class ECCDH_Private_key():
+    def __init__(self, r):
+        self.r = r
     
 class RA_MSG_TYPE(Enum):
     TYPE_RA_MSG0 = 0

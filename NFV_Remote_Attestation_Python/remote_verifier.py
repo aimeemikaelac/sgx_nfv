@@ -4,6 +4,7 @@ import array
 # need to install the backported enum for this
 from enum import Enum
 from service_provider_util import *
+from sample_crypto_wrappermodule import *
 
 request_struct_size = (8 + 32 + 3*8)/8
 
@@ -13,6 +14,9 @@ GLOBAL_AUTHENTICATION_TOKEN = 0
 GLOBAL_SP_CREDENTIALS = 0
 
 GLOBAL_CLIENT_PUBLIC_KEY = None
+
+GLOBAL_SP_PUBLIC_KEY = None
+GLOBAL_SP_PRIVATE_KEY = None
 
 ECP_KEY_SIZE = 256/8
 
@@ -41,6 +45,11 @@ def ra_proc_msg1_req(request_body):
         return -1
     
     GLOBAL_CLIENT_PUBLIC_KEY = ECCDH_Public_Key(ga_x, ga_y)
+    
+    sp_ga_x, sp_ga_y, sp_ga_priv_r = generateDHKeys()
+    GLOBAL_SP_PUBLIC_KEY = ECCDH_Public_Key(sp_ga_x, sp_ga_y)
+    GLOBAL_SP_PRIVATE_KEY = ECCDH_Private_key(sp_ga_priv_r)
+    
     
     
     return 0, RA_SAMP_RESPONSE()
