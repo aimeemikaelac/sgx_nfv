@@ -20,6 +20,12 @@
 #include "App.h"
 #include "enclave1_u.h"
 
+#include <sys/socket.h>
+#include <sys/stat.h>
+#include <arpa/inet.h>
+
+#include "stdlib.h"
+
 #ifndef TRUE
 # define TRUE 1
 #endif
