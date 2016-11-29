@@ -79,7 +79,7 @@ void handle_connection(int socket_fd){
     unsigned char *data;
     unsigned char response[100];
 
-    recv_buff = malloc(recv_size);
+    recv_buff = (unsigned char*)malloc(recv_size);
     if(recv_buff == NULL){
         printf("Error allocating receive buffer\n");
         return;
@@ -104,7 +104,7 @@ void handle_connection(int socket_fd){
     while(total_received < total_data){
         recv_size += 1000;
         recv_offset += 1000;
-        more_recv_buff = realloc(recv_buff, recv_size);
+        more_recv_buff = (unsigned char*)realloc(recv_buff, recv_size);
         if(more_recv_buff == NULL){
             printf("Failed to extend buffer to %i", recv_size);
             free(recv_buff);
@@ -124,7 +124,7 @@ void handle_connection(int socket_fd){
     ecall_process_packet(global_eid, data, data_length);
     memset(response, 0, 100);
     //for now, just send back the data length we received
-    sprintf((char*)response, "OK:%i", data_length);
+    sprintf((char*)response, "OK:%i", (int)data_length);
     if(send(socket_fd, response, strlen((char*)response) + 1, 0) < 0){
         printf("Error sending response\n");
     }
@@ -208,5 +208,6 @@ int main(int argc, char const *argv[]) {
     if (status != SGX_SUCCESS) {
         std::cout << "SGX error" << std::endl;
     }
+    run_server();
     return 0;
 }
