@@ -29,6 +29,7 @@ void handle_connection(int socket_fd){
     unsigned char *more_recv_buff = NULL;
     unsigned char *data;
     unsigned char response[100];
+    int processing_count = 0;
 
     recv_buff = (unsigned char*)malloc(recv_size);
     if(recv_buff == NULL){
@@ -79,10 +80,10 @@ void handle_connection(int socket_fd){
         total_received += bytes_received;
     }
 //    ecall_process_packet(global_eid, data, data_length);
-    process_packet(data, data_length);
+    processing_count = process_packet(data, data_length);
     memset(response, 0, 100);
     //for now, just send back the data length we received
-    sprintf((char*)response, "OK:%i", (int)data_length);
+    sprintf((char*)response, "OK:%i", processing_count);
     if(send(socket_fd, response, strlen((char*)response) + 1, 0) < 0){
         printf("Error sending response\n");
     }
