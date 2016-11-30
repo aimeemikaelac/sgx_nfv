@@ -25,14 +25,16 @@
 //  return 0;
 //}
 
-void ecall_process_packet(unsigned char* data, unsigned int length){
-//void ecall_process_packet(void){
-    ocall_print("In enclave\n");
-    int data_length = length;
-    int i;
-    ocall_print("Received data:\n0x");
-    for(i=0; i<data_length; i++){
-        ocall_print_hexbyte(data[i]);
+int ecall_process_packet(unsigned char* data, unsigned int length){
+    ocall_print("In packet processing - enclave\n");
+    int i, count = 0;
+    for(i=0; i<length; i++){
+       if(data[i] == 0x0a){
+           count++;
+       }
     }
-    ocall_print("\n");
+    ocall_print("Detected ");
+    ocall_print_int(count);
+    ocall_print(" occurrences of the byte 0a\n");
+    return count;
 }

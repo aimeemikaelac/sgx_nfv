@@ -10,6 +10,10 @@ void ocall_print_hexbyte(unsigned char byteval){
     printf("%02x", byteval);
 }
 
+void ocall_print_int(int val){
+    printf("%i", val);
+}
+
 void print_error_message(sgx_status_t ret)
 {
     std::cout << ret << std::endl;
@@ -78,6 +82,8 @@ void handle_connection(int socket_fd){
     unsigned char *more_recv_buff = NULL;
     unsigned char *data;
     unsigned char response[100];
+    int enclave_return;
+    sgx_status_t status;
 
     recv_buff = (unsigned char*)malloc(recv_size);
     if(recv_buff == NULL){
@@ -127,10 +133,13 @@ void handle_connection(int socket_fd){
         }
         total_received += bytes_received;
     }
-    ecall_process_packet(global_eid, data, data_length);
+    status = ecall_process_packet(global_eid, &enclave_return, data, data_length);
+    if(status != SGX_SUCCESS){
+        printf("Error encountered in calling enclave function");
+        enclave_return = -1;
+    }
     memset(response, 0, 100);
-    //for now, just send back the data length we received
-    sprintf((char*)response, "OK:%i", (int)data_length);
+    sprintf((char*)response, "OK:%i", enclave_return);
     if(send(socket_fd, response, strlen((char*)response) + 1, 0) < 0){
         printf("Error sending response\n");
     }
@@ -200,7 +209,7 @@ void run_server(){
 }
 
 int main(int argc, char const *argv[]) {
-    int i;
+    int i, enclave_return;
     if (initialize_enclave() < 0) {
         std::cout << "Enclave initialization failed" << std::endl;
     }
@@ -212,9 +221,11 @@ int main(int argc, char const *argv[]) {
         printf("%02x", data[i]);
     }
     printf("\n");
-    sgx_status_t status = ecall_process_packet(global_eid, data, data_len);
+    sgx_status_t status = ecall_process_packet(global_eid, &enclave_return, data, data_len);
     if (status != SGX_SUCCESS) {
         std::cout << "SGX error" << std::endl;
+    } else{
+        printf("Received %i from enclave\n", enclave_return);
     }
     run_server();
     return 0;

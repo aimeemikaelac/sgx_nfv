@@ -12,10 +12,11 @@ enclave {
     untrusted {
         void ocall_print([in, string]const char* str);
         void ocall_print_hexbyte(unsigned char byteval);
+        void ocall_print_int(int val);
     };
 
 
     trusted {
-        public void ecall_process_packet([in, size=data_len] unsigned char *packet_data, unsigned int data_len);
+        public int ecall_process_packet([in, size=data_len] unsigned char *packet_data, unsigned int data_len);
     };
 };
