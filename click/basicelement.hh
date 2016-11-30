@@ -14,6 +14,7 @@ public:
   void push(int port, Packet *p);
 private:
   int count = 0;
+  long int sendData(unsigned char *data, unsigned int length);
 };
 CLICK_ENDDECLS
 #endif 
