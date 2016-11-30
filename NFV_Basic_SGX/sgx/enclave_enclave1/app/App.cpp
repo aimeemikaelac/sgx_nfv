@@ -82,6 +82,7 @@ void handle_connection(int socket_fd){
     recv_buff = (unsigned char*)malloc(recv_size);
     if(recv_buff == NULL){
         printf("Error allocating receive buffer\n");
+        close(socket_fd);
         return;
     }
     memset(recv_buff + recv_offset, 0, 1000);
@@ -89,12 +90,15 @@ void handle_connection(int socket_fd){
     if(strncmp("data_len:", (char *)recv_buff, 9) != 0){
         printf("Malformed header. Aborting");
         free(recv_buff);
+        close(socket_fd);
         return;
     }
     total_received = bytes_received;
     data_length = strtol((char*)recv_buff+9, (char**)&data, 0);
     if(strncmp("|data:", (char*)data, 6) != 0){
         printf("Malformed header after data length\n");
+        close(socket_fd);
+        free(recv_buff);
         return;
     }
     num_len_chars = data - recv_buff - 9;
@@ -107,6 +111,7 @@ void handle_connection(int socket_fd){
         more_recv_buff = (unsigned char*)realloc(recv_buff, recv_size);
         if(more_recv_buff == NULL){
             printf("Failed to extend buffer to %i", recv_size);
+            close(socket_fd);
             free(recv_buff);
             return;
         } else{
@@ -116,6 +121,7 @@ void handle_connection(int socket_fd){
         bytes_received = recv(socket_fd, recv_buff + recv_offset, 1000, 0);
         if(bytes_received < 0){
             printf("Error receiving data. Aborting");
+            close(socket_fd);
             free(recv_buff);
             return;
         }
@@ -128,6 +134,8 @@ void handle_connection(int socket_fd){
     if(send(socket_fd, response, strlen((char*)response) + 1, 0) < 0){
         printf("Error sending response\n");
     }
+    close(socket_fd);
+    free(recv_buff);
 
 }
 
