@@ -71,6 +71,17 @@ int initialize_enclave() {
     return 0;
 }
 
+int call_process_packet_sgx(unsigned char *data, unsigned int length){
+    int enclave_return = 0;
+    sgx_status_t status;
+    status = ecall_process_packet(global_eid, &enclave_return, data, length);
+    if(status != SGX_SUCCESS){
+        printf("Error encountered in calling enclave function");
+        enclave_return = -1;
+    }
+    return enclave_return;
+}
+
 void handle_connection(int socket_fd){
     int recv_size = 1000;
     int recv_offset = 0;
@@ -85,7 +96,6 @@ void handle_connection(int socket_fd){
     unsigned char *data;
     unsigned char response[100];
     int enclave_return;
-    sgx_status_t status;
 
     recv_buff = (unsigned char*)malloc(recv_size);
     if(recv_buff == NULL){
@@ -135,11 +145,7 @@ void handle_connection(int socket_fd){
         }
         total_received += bytes_received;
     }
-    status = ecall_process_packet(global_eid, &enclave_return, data, data_length);
-    if(status != SGX_SUCCESS){
-        printf("Error encountered in calling enclave function");
-        enclave_return = -1;
-    }
+    enclave_return = call_process_packet_sgx(data, data_length);
     memset(response, 0, 100);
     sprintf((char*)response, "OK:%i", enclave_return);
     if(send(socket_fd, response, strlen((char*)response) + 1, 0) < 0){
