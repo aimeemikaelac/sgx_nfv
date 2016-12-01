@@ -1,5 +1,7 @@
 #!/bin/bash
 
+#TODO: add some arg parsing to allow for specifying build dir and what to install
+
 git submodule update
 cd linux-sgx/
 echo "Building SGX with default options (with default install dir- /opt/intel/sgxsdk)"
