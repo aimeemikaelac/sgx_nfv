@@ -1,5 +1,7 @@
 #include "App.h"
 
+sgx_enclave_id_t global_eid = 0;
+
 using namespace std;
 
 void ocall_print(const char* str) {
@@ -16,7 +18,7 @@ void ocall_print_int(int val){
 
 void print_error_message(sgx_status_t ret)
 {
-    std::cout << ret << std::endl;
+    std::cout << "Encountered SGX error: " << ret << std::endl;
 }
 
 int initialize_enclave() {
@@ -208,25 +210,25 @@ void run_server(){
     }
 }
 
-int main(int argc, char const *argv[]) {
-    int i, enclave_return;
-    if (initialize_enclave() < 0) {
-        std::cout << "Enclave initialization failed" << std::endl;
-    }
-
-    unsigned char data[] = {'t','e', 's', 't', '\n'};
-    unsigned int data_len = 5;
-    printf("Expected data:\n0x");
-    for(i=0; i<5; i++){
-        printf("%02x", data[i]);
-    }
-    printf("\n");
-    sgx_status_t status = ecall_process_packet(global_eid, &enclave_return, data, data_len);
-    if (status != SGX_SUCCESS) {
-        std::cout << "SGX error" << std::endl;
-    } else{
-        printf("Received %i from enclave\n", enclave_return);
-    }
-    run_server();
-    return 0;
-}
+//int main(int argc, char const *argv[]) {
+//    int i, enclave_return;
+//    if (initialize_enclave() < 0) {
+//        std::cout << "Enclave initialization failed" << std::endl;
+//    }
+//
+//    unsigned char data[] = {'t','e', 's', 't', '\n'};
+//    unsigned int data_len = 5;
+//    printf("Expected data:\n0x");
+//    for(i=0; i<5; i++){
+//        printf("%02x", data[i]);
+//    }
+//    printf("\n");
+//    sgx_status_t status = ecall_process_packet(global_eid, &enclave_return, data, data_len);
+//    if (status != SGX_SUCCESS) {
+//        std::cout << "SGX error" << std::endl;
+//    } else{
+//        printf("Received %i from enclave\n", enclave_return);
+//    }
+//    run_server();
+//    return 0;
+//}

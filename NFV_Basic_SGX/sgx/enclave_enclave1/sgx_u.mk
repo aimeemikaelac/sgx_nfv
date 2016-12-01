@@ -2,8 +2,8 @@
 SGX_SDK ?= /opt/intel/sgxsdk
 SGX_MODE ?= SIM
 SGX_ARCH ?= x64
-#UNTRUSTED_DIR=untrusted
-UNTRUSTED_DIR=app
+UNTRUSTED_DIR=untrusted
+#UNTRUSTED_DIR=app
 
 ifeq ($(shell getconf LONG_BIT), 32)
 	SGX_ARCH := x86
@@ -87,8 +87,8 @@ endif
 .PHONY: all run
 
 ifeq ($(Build_Mode), HW_RELEASE)
-all: sample
-	@echo "Build sample [$(Build_Mode)|$(SGX_ARCH)] success!"
+all: app
+	@echo "Build app [$(Build_Mode)|$(SGX_ARCH)] success!"
 	@echo
 	@echo "*********************************************************************************************************************************************************"
 	@echo "PLEASE NOTE: In this mode, please sign the enclave1.so first using Two Step Sign mechanism before you run the app to launch and access the enclave."
@@ -97,13 +97,13 @@ all: sample
 
 
 else
-all: sample
+all: app
 endif
 
 run: all
 ifneq ($(Build_Mode), HW_RELEASE)
-	@$(CURDIR)/sample
-	@echo "RUN  =>  sample [$(SGX_MODE)|$(SGX_ARCH), OK]"
+	@$(CURDIR)/app
+	@echo "RUN  =>  app [$(SGX_MODE)|$(SGX_ARCH), OK]"
 endif
 
 ######## App Objects ########
@@ -119,8 +119,11 @@ $(UNTRUSTED_DIR)/enclave1_u.o: $(UNTRUSTED_DIR)/enclave1_u.c
 $(UNTRUSTED_DIR)/%.o: $(UNTRUSTED_DIR)/%.cpp
 	@$(CXX) $(App_Cpp_Flags) -c $< -o $@
 	@echo "CXX  <=  $<"
+	
+lib: $(UNTRUSTED_DIR)/enclave1_u.o $(App_Cpp_Objects)
+	ar rvs libapp.a $(App_Cpp_Objects) $(UNTRUSTED_DIR)/enclave1_u.o
 
-sample: $(UNTRUSTED_DIR)/enclave1_u.o $(App_Cpp_Objects)
+app: $(UNTRUSTED_DIR)/enclave1_u.o $(App_Cpp_Objects)
 	@$(CXX) $^ -o $@ $(App_Link_Flags)
 	@echo "LINK =>  $@"
 
@@ -128,4 +131,4 @@ sample: $(UNTRUSTED_DIR)/enclave1_u.o $(App_Cpp_Objects)
 .PHONY: clean
 
 clean:
-	@rm -f sample  $(App_Cpp_Objects) $(UNTRUSTED_DIR)/enclave1_u.* 
+	@rm -f app  $(App_Cpp_Objects) $(UNTRUSTED_DIR)/enclave1_u.* libapp.a 

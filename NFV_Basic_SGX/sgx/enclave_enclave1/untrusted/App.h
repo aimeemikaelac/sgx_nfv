@@ -33,11 +33,17 @@
 #ifndef FALSE
 # define FALSE 0
 #endif
+/*
+ To build an example that is linked against the library:
+ g++ -Ienclave_enclave1/untrusted -I/opt/intel/sgxsdk/include/ -Lenclave_enclave1/ -L/opt/intel/sgxsdk/lib64 test.cpp -o test.o -lapp -lsgx_urts_sim -lsgx_uae_service_sim -lpthread
+ */
 
 
 # define TOKEN_FILENAME   "enclave.token"
 # define ENCLAVE1_FILENAME "enclave1.signed.so"
 
-sgx_enclave_id_t global_eid = 0;
+void run_server();
+void handle_connection(int socket_fd);
+int initialize_enclave();
 
 #endif /* ENCLAVE_ENCLAVE1_APP_APP_H_ */
