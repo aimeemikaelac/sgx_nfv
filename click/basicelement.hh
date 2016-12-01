@@ -6,7 +6,7 @@ CLICK_DECLS
 class BasicElement: public Element {
 
 public:
-  BasicElement() {}
+  BasicElement();
   ~BasicElement() {}
   const char *class_name() const { return "BasicElement"; }
   const char *port_count() const { return PORTS_1_1; }

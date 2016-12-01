@@ -6,16 +6,39 @@
 #include "string.h"
 #include "stdlib.h"
 #include <unistd.h>
+#include "App.h"
 CLICK_DECLS
 
 using namespace std;
+
+BasicElement::BasicElement(){
+  int ret = initialize_enclave();
+  if(ret < 0){
+    printf("Initializing enclave failed");
+  }
+}
+
+int call_process_packet_no_sgx(unsigned char *data, unsigned int length){
+  printf("In packet processing - NO enclave\n");
+  int i, count = 0;
+  for(i=0; i<length; i++){
+    if(data[i] == 0x0a){
+      count++;
+    }
+  }
+  printf("Detected %i occurrences of the byte 0a\n");
+  return count;
+}
 
 void BasicElement::push(int port, Packet *p){
   count++;
   cout << "Received packet. Updating count to: "<<count<<endl;
   unsigned char *data = (unsigned char*)p->data();
   unsigned int data_len = p->length();
-  long int response_count = sendData(data, data_len);
+//  int response_count = call_process_packet_sgx(data, data_len);
+  int response_count = call_process_packet_no_sgx(data, data_len);
+
+//  long int response_count = sendData(data, data_len);
 /*  if(response_len != data_len){
 	p->kill();
   } else{
