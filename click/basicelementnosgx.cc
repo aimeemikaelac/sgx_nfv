@@ -1,5 +1,5 @@
 #include <click/config.h>
-#include "basicelement.hh"
+#include "basicelementnosgx.hh"
 #include <iostream>
 #include <sys/socket.h>
 #include <netdb.h>
@@ -11,19 +11,28 @@ CLICK_DECLS
 
 using namespace std;
 
-BasicElement::BasicElement(){
-  int ret = initialize_enclave();
-  if(ret < 0){
-    printf("Initializing enclave failed");
-  }
+BasicElementNoSGX::BasicElementNoSGX(){
 }
 
-void BasicElement::push(int port, Packet *p){
+int BasicElementNoSGX::call_process_packet_no_sgx(unsigned char *data, unsigned int length){
+  printf("In packet processing - NO enclave\n");
+  int i, count = 0;
+  for(i=0; i<length; i++){
+    if(data[i] == 0x0a){
+      count++;
+    }
+  }
+  printf("Detected %i occurrences of the byte 0a\n");
+  return count;
+}
+
+void BasicElementNoSGX::push(int port, Packet *p){
   count++;
   cout << "Received packet. Updating count to: "<<count<<endl;
   unsigned char *data = (unsigned char*)p->data();
   unsigned int data_len = p->length();
-  int response_count = call_process_packet_sgx(data, data_len);
+//  int response_count = call_process_packet_sgx(data, data_len);
+  int response_count = BasicElementNoSGX::call_process_packet_no_sgx(data, data_len);
 
 //  long int response_count = sendData(data, data_len);
 /*  if(response_len != data_len){
@@ -46,7 +55,7 @@ void BasicElement::push(int port, Packet *p){
   *   <long int> the response from the client or a negative number indicating
   *   an error code
  **/
-long int BasicElement::sendData(unsigned char *data, unsigned int length){
+long int BasicElementNoSGX::sendData(unsigned char *data, unsigned int length){
 	struct sockaddr_in *server_socket;
     struct addrinfo hints;
 	struct addrinfo *serverinfo, *iter;
@@ -154,4 +163,4 @@ long int BasicElement::sendData(unsigned char *data, unsigned int length){
 }
 
 CLICK_ENDDECLS
-EXPORT_ELEMENT(BasicElement)
+EXPORT_ELEMENT(BasicElementNoSGX)
