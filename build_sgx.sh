@@ -2,6 +2,8 @@
 
 #TODO: add some arg parsing to allow for specifying build dir and what to install
 
+git submodule init
+
 git submodule update
 cd linux-sgx/
 echo "Building SGX with default options (with default install dir- /opt/intel/sgxsdk)"
@@ -24,6 +26,6 @@ sudo mkdir -p /opt/intel
 
 cd /opt/intel
 
-sudo su -c "$repo_dir/linux/installer/bin/sgx_linux_x64_sdk_1.6.100.34922.bin"
+sudo su -c "echo yes | $repo_dir/linux/installer/bin/sgx_linux_x64_sdk_1.6.100.34922.bin"
 
-sudo chmod -R 0777 /opt/intel
+sudo chmod -R 0777 /opt/intel/sgxsdk
