@@ -43,6 +43,9 @@
  export LIBS="-lapp -lsgx_urts_sim -lsgx_uae_service_sim -lpthread"
 
  need to set these variables in the shell and then run ./configure again
+
+ if we are using hardware-mode sgx, need to change the variables to:
+ export LIBS="-lapp -lsgx_urts -lsgx_uae_service -lpthread"
  */
 
 
