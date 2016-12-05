@@ -2,9 +2,9 @@
 #include <errno.h>
 
 typedef struct ms_ecall_process_packet_t {
-	int ms_retval;
 	unsigned char* ms_packet_data;
 	unsigned int ms_data_len;
+	unsigned char* ms_hash_out;
 } ms_ecall_process_packet_t;
 
 typedef struct ms_ocall_print_t {
@@ -54,14 +54,14 @@ static const struct {
 		(void*)enclave1_ocall_print_int,
 	}
 };
-sgx_status_t ecall_process_packet(sgx_enclave_id_t eid, int* retval, unsigned char* packet_data, unsigned int data_len)
+sgx_status_t ecall_process_packet(sgx_enclave_id_t eid, unsigned char* packet_data, unsigned int data_len, unsigned char* hash_out)
 {
 	sgx_status_t status;
 	ms_ecall_process_packet_t ms;
 	ms.ms_packet_data = packet_data;
 	ms.ms_data_len = data_len;
+	ms.ms_hash_out = hash_out;
 	status = sgx_ecall(eid, 0, &ocall_table_enclave1, &ms);
-	if (status == SGX_SUCCESS && retval) *retval = ms.ms_retval;
 	return status;
 }
 

@@ -3,6 +3,7 @@
 enclave {
 
 	include "sgx_trts.h"
+	include "sgx_tcrypto.h"
     
     /* 
      * ocall_enclave1_sample - invokes OCALL to display string buffer inside the enclave.
@@ -17,6 +18,6 @@ enclave {
 
 
     trusted {
-        public int ecall_process_packet([in, size=data_len] unsigned char *packet_data, unsigned int data_len);
+        public void ecall_process_packet([in, size=data_len] unsigned char *packet_data, unsigned int data_len, [out, size=32] unsigned char *hash_out);
     };
 };
