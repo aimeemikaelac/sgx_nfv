@@ -6,7 +6,7 @@
 #include "string.h"
 #include "stdlib.h"
 #include <unistd.h>
-#include "App.h"
+#include "openssl.sha.h"
 CLICK_DECLS
 
 using namespace std;
@@ -14,8 +14,8 @@ using namespace std;
 BasicElementNoSGX::BasicElementNoSGX(){
 }
 
-int BasicElementNoSGX::call_process_packet_no_sgx(unsigned char *data, unsigned int length){
-  printf("In packet processing - NO enclave\n");
+void BasicElementNoSGX::call_process_packet_no_sgx(unsigned char *data, unsigned int length, unsigned char hash[SHA256_DIGEST_LENGTH]){
+/*  printf("In packet processing - NO enclave\n");
   int i, count = 0;
   for(i=0; i<length; i++){
     if(data[i] == 0x0a){
@@ -23,16 +23,28 @@ int BasicElementNoSGX::call_process_packet_no_sgx(unsigned char *data, unsigned 
     }
   }
   printf("Detected %i occurrences of the byte 0a\n");
-  return count;
+  return count;*/
+  memset(hash, 0, SHA256_DIGEST_LENGTH);
+  SHA256_CTX ctx;
+  SHA256_Init(&ctx);
+  SHA256_Update(&ctx, data, length);
+  SHA256_Final(hash, &ctx);
 }
 
 void BasicElementNoSGX::push(int port, Packet *p){
+  int i;
   count++;
   cout << "Received packet. Updating count to: "<<count<<endl;
   unsigned char *data = (unsigned char*)p->data();
   unsigned int data_len = p->length();
 //  int response_count = call_process_packet_sgx(data, data_len);
-  int response_count = BasicElementNoSGX::call_process_packet_no_sgx(data, data_len);
+  unsigned char hash[SHA256_DIGEST_LENGTH];
+  BasicElementNoSGX::call_process_packet_no_sgx(data, data_len, hash);
+  printf("Message SHA256: 0x");
+  for(i=0; i<SHA256_DIGEST_LENGTH; i++){
+    printf("%02x", hash[i]);
+  }
+  printf("\n");
 
 //  long int response_count = sendData(data, data_len);
 /*  if(response_len != data_len){
@@ -40,7 +52,7 @@ void BasicElementNoSGX::push(int port, Packet *p){
   } else{
   	output(0).push(p);
   }*/
-  cout << "Count received from processor of 0x0A bytes was: "<<response_count << endl;
+//  cout << "Count received from processor of 0x0A bytes was: "<<response_count << endl;
   output(0).push(p);
 }
 
