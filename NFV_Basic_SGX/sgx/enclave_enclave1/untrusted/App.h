@@ -42,12 +42,12 @@
  env. variables to build with click:
  export CPPFLAGS="-I/opt/intel/sgxsdk/include/ -I/home/michael/sgx_nfv/NFV_Basic_SGX/sgx/enclave_enclave1/untrusted/"
  export LDFLAGS="-L/home/michael/sgx_nfv/NFV_Basic_SGX/sgx/enclave_enclave1/ -L/opt/intel/sgxsdk/lib64"
- export LIBS="-lapp -lsgx_urts_sim -lsgx_uae_service_sim -lpthread"
+ export LIBS="-lapp -lsgx_urts_sim -lsgx_uae_service_sim -lpthread -lcrypto"
 
  need to set these variables in the shell and then run ./configure again
 
  if we are using hardware-mode sgx, need to change the variables to:
- export LIBS="-lapp -lsgx_urts -lsgx_uae_service -lpthread"
+ export LIBS="-lapp -lsgx_urts -lsgx_uae_service -lpthread -lcrypto"
  */
 
 
