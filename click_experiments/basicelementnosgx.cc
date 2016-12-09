@@ -6,7 +6,7 @@
 #include "string.h"
 #include "stdlib.h"
 #include <unistd.h>
-#include "openssl.sha.h"
+#include "openssl/sha.h"
 CLICK_DECLS
 
 using namespace std;

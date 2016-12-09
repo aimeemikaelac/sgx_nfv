@@ -15,7 +15,7 @@ public:
 private:
   int count = 0;
   long int sendData(unsigned char *data, unsigned int length);
-  int call_process_packet_no_sgx(unsigned char *data, unsigned int length);
+  void call_process_packet_no_sgx(unsigned char *data, unsigned int length, unsigned char *hash);
 };
 CLICK_ENDDECLS
 #endif 

@@ -23,7 +23,7 @@ void BasicElement::push(int port, Packet *p){
   cout << "Received packet. Updating count to: "<<count<<endl;
   unsigned char *data = (unsigned char*)p->data();
   unsigned int data_len = p->length();
-  int response_count = call_process_packet_sgx(data, data_len);
+  call_process_packet_sgx(data, data_len);
 
 //  long int response_count = sendData(data, data_len);
 /*  if(response_len != data_len){
@@ -31,7 +31,7 @@ void BasicElement::push(int port, Packet *p){
   } else{
   	output(0).push(p);
   }*/
-  cout << "Count received from processor of 0x0A bytes was: "<<response_count << endl;
+  //cout << "Count received from processor of 0x0A bytes was: "<<response_count << endl;
   output(0).push(p);
 }
 
