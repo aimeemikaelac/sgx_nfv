@@ -20,7 +20,7 @@ BasicElement::BasicElement(){
 
 void BasicElement::push(int port, Packet *p){
   count++;
-  cout << "Received packet. Updating count to: "<<count<<endl;
+//  cout << "Received packet. Updating count to: "<<count<<endl;
   unsigned char *data = (unsigned char*)p->data();
   unsigned int data_len = p->length();
   call_process_packet_sgx(data, data_len);

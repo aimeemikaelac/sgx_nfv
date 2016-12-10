@@ -80,11 +80,11 @@ void call_process_packet_sgx(unsigned char *data, unsigned int length){
     if(status != SGX_SUCCESS){
         printf("Error encountered in calling enclave function");
     }
-    printf("Message sha256: 0x");
+/*    printf("Message sha256: 0x");
     for(i=0; i<SGX_SHA256_HASH_SIZE; i++){
         printf("%02x", hash[i]);
     }
-    printf("\n");
+    printf("\n");*/
 }
 
 void handle_connection(int socket_fd){

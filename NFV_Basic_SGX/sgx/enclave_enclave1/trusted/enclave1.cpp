@@ -27,7 +27,7 @@
 //}
 
 void ecall_process_packet(unsigned char* data, unsigned int length, unsigned char hash_out[SGX_SHA256_HASH_SIZE]){
-    ocall_print("In packet processing - enclave\n");
+//    ocall_print("In packet processing - enclave\n");
     sgx_status_t status;
     sgx_sha256_hash_t hash;
     status = sgx_sha256_msg(data, length, &hash);

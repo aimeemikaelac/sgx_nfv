@@ -34,17 +34,17 @@ void BasicElementNoSGX::call_process_packet_no_sgx(unsigned char *data, unsigned
 void BasicElementNoSGX::push(int port, Packet *p){
   int i;
   count++;
-  cout << "Received packet. Updating count to: "<<count<<endl;
+//  cout << "Received packet. Updating count to: "<<count<<endl;
   unsigned char *data = (unsigned char*)p->data();
   unsigned int data_len = p->length();
 //  int response_count = call_process_packet_sgx(data, data_len);
   unsigned char hash[SHA256_DIGEST_LENGTH];
   BasicElementNoSGX::call_process_packet_no_sgx(data, data_len, hash);
-  printf("Message SHA256: 0x");
+/*  printf("Message SHA256: 0x");
   for(i=0; i<SHA256_DIGEST_LENGTH; i++){
     printf("%02x", hash[i]);
   }
-  printf("\n");
+  printf("\n");*/
 
 //  long int response_count = sendData(data, data_len);
 /*  if(response_len != data_len){
