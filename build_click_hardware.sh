@@ -14,7 +14,7 @@ git submodule update
 #build SGX module
 cd $DIR/NFV_Basic_SGX/sgx/enclave_enclave1
 make clean
-make SGX_MODE=HW DEBUG=1 lib
+make SGX_MODE=HW SGX_PRERELEASE=1 lib
 
 cd $DIR/click/elements/local
 for i in "${click_elements[@]}"
