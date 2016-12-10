@@ -15,20 +15,23 @@ BasicElementNoSGX::BasicElementNoSGX(){
 }
 
 void BasicElementNoSGX::call_process_packet_no_sgx(unsigned char *data, unsigned int length, unsigned char hash[SHA256_DIGEST_LENGTH]){
-/*  printf("In packet processing - NO enclave\n");
+//  printf("In packet processing - NO enclave\n");
   int i, count = 0;
   for(i=0; i<length; i++){
     if(data[i] == 0x0a){
       count++;
     }
   }
-  printf("Detected %i occurrences of the byte 0a\n");
+  for(i=0; i<SHA256_DIGEST_LENGTH; i++){
+    hash[i] = (unsigned char)(i)*(unsigned char)(count);
+  }
+  /*printf("Detected %i occurrences of the byte 0a\n");
   return count;*/
-  memset(hash, 0, SHA256_DIGEST_LENGTH);
+/*  memset(hash, 0, SHA256_DIGEST_LENGTH);
   SHA256_CTX ctx;
   SHA256_Init(&ctx);
   SHA256_Update(&ctx, data, length);
-  SHA256_Final(hash, &ctx);
+  SHA256_Final(hash, &ctx);*/
 }
 
 void BasicElementNoSGX::push(int port, Packet *p){
