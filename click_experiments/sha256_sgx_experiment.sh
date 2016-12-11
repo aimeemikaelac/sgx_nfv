@@ -13,6 +13,7 @@ echo "Running the sha256 SGX test"
 CSV_HEADER="Counter Count,Source Count,Sink Count,Counter Byte Count,Counter Bit Rate (bit/s),Counter Byte Rate (bytes/s)"
 echo "$CSV_HEADER" > $OUTPUT_FILE
 
+source /opt/intel/sgxsdk/environment
 cd $SCRIPTPATH/../NFV_Basic_SGX/sgx/enclave_enclave1
 
 for ((i=0;i<$ITERATIONS;i++));

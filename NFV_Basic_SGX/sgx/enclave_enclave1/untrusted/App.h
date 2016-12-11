@@ -27,6 +27,7 @@
 #include "sgx_tcrypto.h"
 
 #include "stdlib.h"
+#include "math.h"
 
 #ifndef TRUE
 # define TRUE 1

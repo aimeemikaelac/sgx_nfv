@@ -98,13 +98,13 @@ void call_process_packet_sgx_sha256(unsigned char *data, unsigned int length){
 }
 
 void call_process_packet_sgx(unsigned char *data, unsigned int length){
-    // int i;
-    // sgx_status_t status;
-    // status = ecall_process_packet(global_eid, data, length);
-    // if(status != SGX_SUCCESS){
-    //     printf("Error encountered in calling enclave function");
-    // }
-    test_process_packet(data, length);
+    int i;
+    sgx_status_t status;
+    status = ecall_process_packet(global_eid, data, length);
+    if(status != SGX_SUCCESS){
+        printf("Error encountered in calling enclave function");
+    }
+//    test_process_packet(data, length);
 /*    printf("Message sha256: 0x");
     for(i=0; i<SGX_SHA256_HASH_SIZE; i++){
         printf("%02x", hash[i]);
