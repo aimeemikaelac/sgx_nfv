@@ -2,7 +2,7 @@
 
 SCRIPT=$(realpath $0)
 SCRIPTPATH=$(dirname $SCRIPT)
-$DIR=$SCRIPTPATH/..
+DIR=$SCRIPTPATH/..
 cd $DIR
 mkdir -p $DIR/click_out
 

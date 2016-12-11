@@ -2,7 +2,7 @@
 
 SCRIPT=$(realpath $0)
 SCRIPTPATH=$(dirname $SCRIPT)
-$DIR=$SCRIPTPATH/..
+DIR=$SCRIPTPATH/..
 cd $DIR
 mkdir -p $DIR/click_out
 
@@ -18,6 +18,6 @@ cd $DIR/click
 make uninstall
 make clean
 #build
-./configure --enable-local --prefix=$DIR/click_out
+./configure --prefix=$DIR/click_out
 make
 make install
