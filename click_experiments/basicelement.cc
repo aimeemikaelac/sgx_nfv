@@ -14,7 +14,8 @@ using namespace std;
 BasicElement::BasicElement(){
   int ret = initialize_enclave();
   if(ret < 0){
-    printf("Initializing enclave failed");
+    printf("Initializing enclave failed\n");
+    exit(-1);
   }
 }
 

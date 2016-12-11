@@ -15,8 +15,8 @@ echo "$CSV_HEADER" > $OUTPUT_FILE
 
 cd $SCRIPTPATH/../NFV_Basic_SGX/sgx/enclave_enclave1
 
-for ((i=1;i<$ITERATIONS;i++));
+for ((i=0;i<$ITERATIONS;i++));
 do
-  echo "Baseline experiment $i"
+  echo "SHA256 SGX experiment $i"
   $CLICK $EXPERIMENT_DIR/wire_infinite_source_sgx_sha256.click | tee -a $OUTPUT_FILE
 done

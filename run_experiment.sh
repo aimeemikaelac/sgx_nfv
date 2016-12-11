@@ -21,12 +21,12 @@ mkdir -p $LOG_DIR
 
 CLICK=$DIR/click_out/bin/click
 
-GLOBAL_ITERATIONS=20
+GLOBAL_ITERATIONS=1
 BASELINE_ITERATIONS=$GLOBAL_ITERATIONS
 BASIC_SGX_ITERATIONS=$GLOBAL_ITERATIONS
-BASIC_NO_SGX_ITERATIONS=$GLOBAL_ITERATIONS
+BASIC_NOSGX_ITERATIONS=$GLOBAL_ITERATIONS
 SHA256_SGX_ITERATIONS=$GLOBAL_ITERATIONS
-SHA256_NO_SGX_ITERATIONS=$GLOBAL_ITERATIONS
+SHA256_NOSGX_ITERATIONS=$GLOBAL_ITERATIONS
 
 CSV_HEADER="Counter Count,Source Count,Sink Count,Counter Byte Count,Counter Bit Rate (bit/s),Counter Byte Rate (bytes/s)"
 
@@ -41,7 +41,7 @@ mkdir -p $DATA_DIR/$TIMESTAMP
 
 INSTALL_CLICK_FILE=$LOG_DIR/install-click-default-$TIMESTAMP.log
 log_string "Building default click. Logging to $INSTALL_CLICK_FILE" $LOG_FILE
-$DIR/scripts/build_click.sh >> $INSTALL_CLICK_FILE
+$DIR/scripts/build_click.sh >> $INSTALL_CLICK_FILE 2>&1
 
 BASELINE_FILE="$DATA_DIR/$TIMESTAMP/experiment-baseline-$TIMESTAMP.csv"
 $EXPERIMENT_DIR/baseline_experiment.sh $CLICK $BASELINE_FILE $BASELINE_ITERATIONS $EXPERIMENT_DIR | tee -a $LOG_FILE
@@ -52,7 +52,7 @@ $EXPERIMENT_DIR/baseline_experiment.sh $CLICK $BASELINE_FILE $BASELINE_ITERATION
 source /opt/intel/sgxsdk/environment
 INSTALL_CLICK_SGX_SIMULATION_FILE=$LOG_DIR/install-click-sgx-simulation-$TIMESTAMP.log
 log_string "Building click w/ SGX in simulation mode. Logging to $INSTALL_CLICK_SGX_SIMULATION_FILE" $LOG_FILE
-$DIR/scripts/build_click_simulation.sh >> $INSTALL_CLICK_SGX_SIMULATION_FILE
+$DIR/scripts/build_click_simulation.sh >> $INSTALL_CLICK_SGX_SIMULATION_FILE 2>&1
 
 SGX_BASIC_SIMULATION_FILE=$DATA_DIR/$TIMESTAMP/experiment-basic-sgx-simulation-$TIMESTAMP.csv
 $EXPERIMENT_DIR/basic_sgx_experiment.sh $CLICK $SGX_BASIC_SIMULATION_FILE $BASIC_SGX_ITERATIONS $EXPERIMENT_DIR | tee -a $LOG_FILE
@@ -72,7 +72,7 @@ $EXPERIMENT_DIR/sha256_nosgx_experiment.sh $CLICK $NOSGX_SHA256_SIMULATION_FILE 
 
 INSTALL_CLICK_SGX_DEBUG_FILE=$LOG_DIR/install-click-sgx-debug-$TIMESTAMP.log
 log_string "Building click w/ SGX in debug mode. Logging to $INSTALL_CLICK_SGX_DEBUG_FILE" $LOG_FILE
-$DIR/scripts/build_click_hardware_debug.sh >> $INSTALL_CLICK_SGX_DEBUG_FILE
+$DIR/scripts/build_click_hardware_debug.sh >> $INSTALL_CLICK_SGX_DEBUG_FILE 2>&1
 
 SGX_BASIC_DEBUG_FILE=$DATA_DIR/$TIMESTAMP/experiment-basic-sgx-debug-$TIMESTAMP.csv
 $EXPERIMENT_DIR/basic_sgx_experiment.sh $CLICK $SGX_BASIC_DEBUG_FILE $BASIC_SGX_ITERATIONS $EXPERIMENT_DIR | tee -a $LOG_FILE
@@ -86,7 +86,7 @@ $EXPERIMENT_DIR/sha256_sgx_experiment.sh $CLICK $SGX_SHA256_DEBUG_FILE $SHA256_S
 
 INSTALL_CLICK_SGX_PRERELEASE_FILE=$LOG_DIR/install-click-sgx-prerelease-$TIMESTAMP.log
 log_string "Building click w/ SGX in prerelease mode. Logging to $INSTALL_CLICK_SGX_PRERELEASE_FILE" $LOG_FILE
-$DIR/scripts/build_click_hardware_prerelease.sh >> $INSTALL_CLICK_SGX_PRERELEASE_FILE
+$DIR/scripts/build_click_hardware_prerelease.sh >> $INSTALL_CLICK_SGX_PRERELEASE_FILE 2>&1
 
 SGX_BASIC_PRERELEASE_FILE=$DATA_DIR/$TIMESTAMP/experiment-basic-sgx-prerelease-$TIMESTAMP.csv
 $EXPERIMENT_DIR/basic_sgx_experiment.sh $CLICK $SGX_BASIC_PRERELEASE_FILE $BASIC_SGX_ITERATIONS $EXPERIMENT_DIR | tee -a $LOG_FILE

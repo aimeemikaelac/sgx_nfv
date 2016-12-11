@@ -13,8 +13,8 @@ echo "Running the sha256 no-SGX test"
 CSV_HEADER="Counter Count,Source Count,Sink Count,Counter Byte Count,Counter Bit Rate (bit/s),Counter Byte Rate (bytes/s)"
 echo "$CSV_HEADER" > $OUTPUT_FILE
 
-for ((i=1;i<$ITERATIONS;i++));
+for ((i=0;i<$ITERATIONS;i++));
 do
-  echo "Baseline experiment $i"
+  echo "SHA256 nosgx experiment $i"
   $CLICK $EXPERIMENT_DIR/wire_infinite_source_nosgx_sha256.click | tee -a $OUTPUT_FILE
 done
