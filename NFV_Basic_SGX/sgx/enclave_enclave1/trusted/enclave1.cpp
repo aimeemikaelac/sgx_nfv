@@ -26,7 +26,18 @@
 //  return 0;
 //}
 
-void ecall_process_packet(unsigned char* data, unsigned int length, unsigned char hash_out[SGX_SHA256_HASH_SIZE]){
+void ecall_process_packet_sha256(unsigned char* data, unsigned int length, unsigned char hash_out[SGX_SHA256_HASH_SIZE]){
+    sgx_status_t status;
+    sgx_sha256_hash_t hash;
+    status = sgx_sha256_msg(data, length, &hash);
+    if(status != SGX_SUCCESS){
+        ocall_print("Error calculating SHA256 message\n");
+        return;
+    }
+    memcpy(hash_out, &hash, SGX_SHA256_HASH_SIZE);
+}
+
+void ecall_process_packet(unsigned char* data, unsigned int length){
 //    ocall_print("In packet processing - enclave\n");
 /*    sgx_status_t status;
     sgx_sha256_hash_t hash;
@@ -42,9 +53,6 @@ void ecall_process_packet(unsigned char* data, unsigned int length, unsigned cha
        if(data[i] == 0x0a){
            count++;
        }
-    }
-    for(i=0; i<SGX_SHA256_HASH_SIZE; i++){
-	hash_out[i] = (unsigned char)(i)*(unsigned char)(count);
     }
 //    ocall_print("Detected ");
 //    ocall_print_int(count);

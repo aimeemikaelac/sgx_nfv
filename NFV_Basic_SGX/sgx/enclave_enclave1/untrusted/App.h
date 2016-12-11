@@ -58,5 +58,6 @@ void run_server();
 void handle_connection(int socket_fd);
 int initialize_enclave();
 void call_process_packet_sgx(unsigned char *data, unsigned int length);
+void call_process_packet_sgx_sha256(unsigned char *data, unsigned int length);
 
 #endif /* ENCLAVE_ENCLAVE1_APP_APP_H_ */

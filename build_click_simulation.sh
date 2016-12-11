@@ -1,6 +1,6 @@
 #!/bin/bash
 
-click_elements=( "basicelement" "basicelementnosgx" )
+click_elements=( "basicelement" "basicelementnosgx" "basicelementsha256" "basicelementnosgxsha256" )
 
 DIR=$(pwd)
 

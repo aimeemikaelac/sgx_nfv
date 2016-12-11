@@ -1,49 +1,29 @@
 #include <click/config.h>
-#include "basicelementnosgx.hh"
+#include "basicelementsha256.hh"
 #include <iostream>
 #include <sys/socket.h>
 #include <netdb.h>
 #include "string.h"
 #include "stdlib.h"
 #include <unistd.h>
-#include "openssl/sha.h"
+#include "App.h"
 CLICK_DECLS
 
 using namespace std;
 
-BasicElementNoSGX::BasicElementNoSGX(){
-}
-
-void BasicElementNoSGX::call_process_packet_no_sgx(unsigned char *data, unsigned int length){
-//  printf("In packet processing - NO enclave\n");
-  int i, count = 0;
-  for(i=0; i<length; i++){
-    if(data[i] == 0x0a){
-      count++;
-    }
+BasicElementSHA256::BasicElementSHA256(){
+  int ret = initialize_enclave();
+  if(ret < 0){
+    printf("Initializing enclave failed");
   }
-  /*printf("Detected %i occurrences of the byte 0a\n");
-  return count;*/
-/*  memset(hash, 0, SHA256_DIGEST_LENGTH);
-  SHA256_CTX ctx;
-  SHA256_Init(&ctx);
-  SHA256_Update(&ctx, data, length);
-  SHA256_Final(hash, &ctx);*/
 }
 
-void BasicElementNoSGX::push(int port, Packet *p){
-  int i;
+void BasicElementSHA256::push(int port, Packet *p){
   count++;
 //  cout << "Received packet. Updating count to: "<<count<<endl;
   unsigned char *data = (unsigned char*)p->data();
   unsigned int data_len = p->length();
-//  int response_count = call_process_packet_sgx(data, data_len);
-  BasicElementNoSGX::call_process_packet_no_sgx(data, data_len);
-/*  printf("Message SHA256: 0x");
-  for(i=0; i<SHA256_DIGEST_LENGTH; i++){
-    printf("%02x", hash[i]);
-  }
-  printf("\n");*/
+  call_process_packet_sgx_sha256(data, data_len);
 
 //  long int response_count = sendData(data, data_len);
 /*  if(response_len != data_len){
@@ -51,7 +31,7 @@ void BasicElementNoSGX::push(int port, Packet *p){
   } else{
   	output(0).push(p);
   }*/
-//  cout << "Count received from processor of 0x0A bytes was: "<<response_count << endl;
+  //cout << "Count received from processor of 0x0A bytes was: "<<response_count << endl;
   output(0).push(p);
 }
 
@@ -66,7 +46,7 @@ void BasicElementNoSGX::push(int port, Packet *p){
   *   <long int> the response from the client or a negative number indicating
   *   an error code
  **/
-long int BasicElementNoSGX::sendData(unsigned char *data, unsigned int length){
+long int BasicElementSHA256::sendData(unsigned char *data, unsigned int length){
 	struct sockaddr_in *server_socket;
     struct addrinfo hints;
 	struct addrinfo *serverinfo, *iter;
@@ -174,4 +154,4 @@ long int BasicElementNoSGX::sendData(unsigned char *data, unsigned int length){
 }
 
 CLICK_ENDDECLS
-EXPORT_ELEMENT(BasicElementNoSGX)
+EXPORT_ELEMENT(BasicElementSHA256)
