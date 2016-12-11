@@ -28,7 +28,7 @@ BASIC_NOSGX_ITERATIONS=$GLOBAL_ITERATIONS
 SHA256_SGX_ITERATIONS=$GLOBAL_ITERATIONS
 SHA256_NOSGX_ITERATIONS=$GLOBAL_ITERATIONS
 
-CSV_HEADER="Counter Count,Source Count,Sink Count,Counter Byte Count,Counter Bit Rate (bit/s),Counter Byte Rate (bytes/s)"
+CSV_HEADER="Counter Count,Source Count,Sink Count,Counter Byte Count,Counter Packet Rate (packets/s),Counter Bit Rate (bit/s),Counter Byte Rate (bytes/s)"
 
 log_string "Make sure to have run build_sgx.sh before running this script" $LOG_FILE
 log_string "Otherwise the SGX module won't build" $LOG_FILE

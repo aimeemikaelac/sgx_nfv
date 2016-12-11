@@ -1,4 +1,4 @@
-Counter Count,Source Count,Sink Count,Counter Byte Count,Counter Bit Rate (bit/s),Counter Byte Rate (bytes/s)
+Counter Count,Source Count,Sink Count,Counter Byte Count,Counter Packet Rate (packets/s),Counter Bit Rate (bit/s),Counter Byte Rate (bytes/s)
 51600,51600,51600,2113536000,5127.93,1680179000,210022375
 51600,51600,51600,2113536000,5110.352,1674249000,209281125
 51600,51600,51600,2113536000,5148.4375,1686866000,210858250

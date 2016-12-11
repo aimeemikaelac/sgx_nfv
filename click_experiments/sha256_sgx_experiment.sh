@@ -10,7 +10,7 @@ SCRIPTPATH=$(dirname $SCRIPT)
 
 echo "Running the sha256 SGX test"
 
-CSV_HEADER="Counter Count,Source Count,Sink Count,Counter Byte Count,Counter Bit Rate (bit/s),Counter Byte Rate (bytes/s)"
+CSV_HEADER="Counter Count,Source Count,Sink Count,Counter Byte Count,Counter Packet Rate (packets/s),Counter Bit Rate (bit/s),Counter Byte Rate (bytes/s)"
 echo "$CSV_HEADER" > $OUTPUT_FILE
 
 source /opt/intel/sgxsdk/environment
