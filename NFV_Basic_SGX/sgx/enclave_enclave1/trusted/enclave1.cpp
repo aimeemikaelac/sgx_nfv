@@ -5,9 +5,10 @@
 #include "enclave1_t.h"  /* print_string */
 #include "sgx_tcrypto.h"
 #include "string.h"
+#include "math.h"
 
-/* 
- * printf: 
+/*
+ * printf:
  *   Invokes OCALL to display the enclave buffer to the terminal.
  */
 //void printf(const char *fmt, ...)
@@ -38,24 +39,15 @@ void ecall_process_packet_sha256(unsigned char* data, unsigned int length, unsig
 }
 
 void ecall_process_packet(unsigned char* data, unsigned int length){
-//    ocall_print("In packet processing - enclave\n");
-/*    sgx_status_t status;
-    sgx_sha256_hash_t hash;
-    status = sgx_sha256_msg(data, length, &hash);
-    if(status != SGX_SUCCESS){
-        ocall_print("Error calculating SHA256 message\n");
-        return;
+  int index=0, count = 0, sequence_len = ceil(length/500);
+  unsigned char *search_seq = data;
+  unsigned char *curr = data;
+  while(index<(length-sequence_len)){
+    if(memcmp(curr, search_seq, sequence_len) == 0){
+      curr += sequence_len;
+      count ++;
+    } else{
+      curr++;
     }
-    memcpy(hash_out, &hash, SGX_SHA256_HASH_SIZE);*/
-
-    int i, count = 0;
-    for(i=0; i<length; i++){
-       if(data[i] == 0x0a){
-           count++;
-       }
-    }
-//    ocall_print("Detected ");
-//    ocall_print_int(count);
-//    ocall_print(" occurrences of the byte 0a\n");
-//    return count;
+  }
 }

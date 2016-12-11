@@ -7,6 +7,7 @@
 #include "stdlib.h"
 #include <unistd.h>
 #include "openssl/sha.h"
+#include <math.h>
 CLICK_DECLS
 
 using namespace std;
@@ -16,19 +17,17 @@ BasicElementNoSGX::BasicElementNoSGX(){
 
 void BasicElementNoSGX::call_process_packet_no_sgx(unsigned char *data, unsigned int length){
 //  printf("In packet processing - NO enclave\n");
-  int i, count = 0;
-  for(i=0; i<length; i++){
-    if(data[i] == 0x0a){
-      count++;
+  int index=0, count = 0, sequence_len = ceil(length/500);
+  unsigned char *search_seq = data;
+  unsigned char *curr = data;
+  while(index<(length-sequence_len)){
+    if(memcmp(curr, search_seq, sequence_len) == 0){
+      curr += sequence_len;
+      count ++;
+    } else{
+      curr++;
     }
   }
-  /*printf("Detected %i occurrences of the byte 0a\n");
-  return count;*/
-/*  memset(hash, 0, SHA256_DIGEST_LENGTH);
-  SHA256_CTX ctx;
-  SHA256_Init(&ctx);
-  SHA256_Update(&ctx, data, length);
-  SHA256_Final(hash, &ctx);*/
 }
 
 void BasicElementNoSGX::push(int port, Packet *p){
@@ -123,7 +122,7 @@ long int BasicElementNoSGX::sendData(unsigned char *data, unsigned int length){
         close(socket_fd);
 		return -1;
 	}
-    
+
 	rc = send(socket_fd, data, length, 0);
     if(rc < 0){
         printf("Failed to send data\n");
