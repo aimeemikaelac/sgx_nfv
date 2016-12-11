@@ -45,9 +45,11 @@ void ecall_process_packet(unsigned char* data, unsigned int length){
   while(index<(length-sequence_len)){
     if(memcmp(curr, search_seq, sequence_len) == 0){
       curr += sequence_len;
+      index += sequence_len;
       count ++;
     } else{
       curr++;
+      index++;
     }
   }
 }

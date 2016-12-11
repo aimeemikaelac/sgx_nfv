@@ -23,9 +23,11 @@ void BasicElementNoSGX::call_process_packet_no_sgx(unsigned char *data, unsigned
   while(index<(length-sequence_len)){
     if(memcmp(curr, search_seq, sequence_len) == 0){
       curr += sequence_len;
+      index += sequence_len;
       count ++;
     } else{
       curr++;
+      index++;
     }
   }
 }
