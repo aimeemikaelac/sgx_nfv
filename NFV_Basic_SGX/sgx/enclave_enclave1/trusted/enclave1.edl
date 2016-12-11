@@ -4,8 +4,8 @@ enclave {
 
 	include "sgx_trts.h"
 	include "sgx_tcrypto.h"
-    
-    /* 
+
+    /*
      * ocall_enclave1_sample - invokes OCALL to display string buffer inside the enclave.
      *  [in]: copy the string buffer to App outside.
      *  [string]: specifies 'str' is a NULL terminated buffer.
@@ -19,6 +19,6 @@ enclave {
 
     trusted {
         public void ecall_process_packet([user_check] unsigned char *packet_data, unsigned int data_len);
-        public void ecall_process_packet_sha256([in, size=data_len] unsigned char *packet_data, unsigned int data_len, [out, size=32] unsigned char *hash_out);
+        public void ecall_process_packet_sha256([user_check] unsigned char *packet_data, unsigned int data_len, [out, size=32] unsigned char *hash_out);
     };
 };
