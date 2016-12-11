@@ -21,6 +21,22 @@ void print_error_message(sgx_status_t ret)
     std::cout << "Encountered SGX error: " << ret << std::endl;
 }
 
+void test_process_packet(unsigned char *data, unsigned int length){
+  int index=0, count = 0, sequence_len = ceil(length/500);
+  unsigned char *search_seq = data;
+  unsigned char *curr = data;
+  while(index<(length-sequence_len)){
+    if(memcmp(curr, search_seq, sequence_len) == 0){
+      curr += sequence_len;
+      index += sequence_len;
+      count ++;
+    } else{
+      curr++;
+      index++;
+    }
+  }
+}
+
 int initialize_enclave() {
     char* token_path = TOKEN_FILENAME;
     sgx_launch_token_t token = {0};
@@ -82,12 +98,13 @@ void call_process_packet_sgx_sha256(unsigned char *data, unsigned int length){
 }
 
 void call_process_packet_sgx(unsigned char *data, unsigned int length){
-    int i;
-    sgx_status_t status;
-    status = ecall_process_packet(global_eid, data, length);
-    if(status != SGX_SUCCESS){
-        printf("Error encountered in calling enclave function");
-    }
+    // int i;
+    // sgx_status_t status;
+    // status = ecall_process_packet(global_eid, data, length);
+    // if(status != SGX_SUCCESS){
+    //     printf("Error encountered in calling enclave function");
+    // }
+    test_process_packet(data, length);
 /*    printf("Message sha256: 0x");
     for(i=0; i<SGX_SHA256_HASH_SIZE; i++){
         printf("%02x", hash[i]);
