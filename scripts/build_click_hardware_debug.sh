@@ -6,7 +6,7 @@ DIR=$SCRIPTPATH/..
 cd $DIR
 mkdir -p $DIR/click_out
 
-click_elements=( "basicelement" "basicelementnosgx" )
+click_elements=( "basicelement" "basicelementnosgx" "basicelementsha256" "basicelementnosgxsha256" )
 
 echo "Make sure to have run build_sgx.sh before running this script"
 echo "Otherwise the SGX module won't build"
