@@ -1,6 +1,10 @@
 #include "App.h"
 
 sgx_enclave_id_t global_eid = 0;
+volatile unsigned char *packet_data;
+volatile unsigned int packet_length;
+volatile unsigned int valid = 0;
+bool initial_call = false;
 
 using namespace std;
 
@@ -100,9 +104,18 @@ void call_process_packet_sgx_sha256(unsigned char *data, unsigned int length){
 void call_process_packet_sgx(unsigned char *data, unsigned int length){
     int i;
     sgx_status_t status;
-    status = ecall_process_packet(global_eid, data, length);
-    if(status != SGX_SUCCESS){
-        printf("Error encountered in calling enclave function");
+    while(valid == 1){
+      printf("valid is 1\n");
+      continue;
+    }
+    packet_data = data;
+    valid = 1;
+    packet_length = length;
+    if(initial_call == false){
+      status = ecall_process_packet(global_eid, (unsigned int*)&valid, (unsigned char**)&packet_data, (unsigned int*)&packet_length);
+      if(status != SGX_SUCCESS){
+          printf("Error encountered in calling enclave function");
+      }
     }
 //    test_process_packet(data, length);
 /*    printf("Message sha256: 0x");

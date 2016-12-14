@@ -38,18 +38,31 @@ void ecall_process_packet_sha256(unsigned char* data, unsigned int length, unsig
     memcpy(hash_out, &hash, SGX_SHA256_HASH_SIZE);
 }
 
-void ecall_process_packet(unsigned char* data, unsigned int length){
-  int index=0, count = 0, sequence_len = ceil(length/500);
-  unsigned char *search_seq = data;
-  unsigned char *curr = data;
-  while(index<(length-sequence_len)){
-    if(memcmp(curr, search_seq, sequence_len) == 0){
-      curr += sequence_len;
-      index += sequence_len;
-      count ++;
-    } else{
-      curr++;
-      index++;
+void ecall_process_packet(unsigned int *valid, unsigned char** data_in, unsigned int *length){
+  int index=0, count = 0, sequence_len;// = ceil(length/500);
+  unsigned char *search_seq;// = data;
+  unsigned char *curr;//= data;
+  unsigned char *data;
+  while(true){
+    if(*valid == 0){
+      continue;
     }
+    ocall_print("in enclave\n");
+    data = *data_in;
+    sequence_len = ceil(*length/500);
+    search_seq = data;
+    curr = data;
+    while(index<(*length-sequence_len)){
+      if(memcmp(curr, search_seq, sequence_len) == 0){
+        curr += sequence_len;
+        index += sequence_len;
+        count ++;
+      } else{
+        curr++;
+        index++;
+      }
+    }
+    *valid = 0;
+    ocall_print("finishing enclave iteration\n");
   }
 }
