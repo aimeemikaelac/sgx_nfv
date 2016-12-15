@@ -14,11 +14,18 @@ enclave {
         void ocall_print([in, string]const char* str);
         void ocall_print_hexbyte(unsigned char byteval);
         void ocall_print_int(int val);
+        void ocall_print_int_message([in, string]char *message, unsigned int val);
     };
 
 
     trusted {
-        public void ecall_process_packet([user_check] unsigned int *valid, [user_check] unsigned char **packet_data, [user_check] unsigned int *data_len);
+        public void ecall_process_packet([user_check]unsigned char** data_in_buffer,
+        								 [user_check]unsigned int *data_out_buffer,
+        								 [user_check]int* buffer_in_write,
+        								 [user_check]int* buffer_in_read,
+        								 [user_check]int* buffer_out_write,
+        								 [user_check]int* buffer_out_read,
+        								 [user_check]int* length);
         public void ecall_process_packet_sha256([user_check] unsigned char *packet_data, unsigned int data_len, [out, size=32] unsigned char *hash_out);
     };
 };

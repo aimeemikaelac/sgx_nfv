@@ -1,10 +1,19 @@
 #include "App.h"
 
 sgx_enclave_id_t global_eid = 0;
-volatile unsigned char *packet_data;
+volatile unsigned char* data_buffer_in[50];
+volatile int buffer_in_write;
+volatile int buffer_in_read;
+volatile unsigned int data_buffer_out[50];
+volatile int buffer_out_write;
+volatile int buffer_out_read;
 volatile unsigned int packet_length;
 volatile unsigned int valid = 0;
+volatile unsigned int iterations = 0;
+volatile int count = -1;
+unsigned int iterations_sum = 0;
 bool initial_call = false;
+pthread_t sgx_thread;
 
 using namespace std;
 
@@ -23,6 +32,10 @@ void ocall_print_int(int val){
 void print_error_message(sgx_status_t ret)
 {
     std::cout << "Encountered SGX error: " << ret << std::endl;
+}
+
+void ocall_print_int_message(char *message, unsigned int val){
+    printf(message, val);
 }
 
 void test_process_packet(unsigned char *data, unsigned int length){
@@ -101,28 +114,50 @@ void call_process_packet_sgx_sha256(unsigned char *data, unsigned int length){
   }
 }
 
-void call_process_packet_sgx(unsigned char *data, unsigned int length){
-    int i;
-    sgx_status_t status;
-    while(valid == 1){
-      printf("valid is 1\n");
-      continue;
+static void *init_sgx_thread(void *args){
+    sgx_status_t status = ecall_process_packet(global_eid,
+                                               (unsigned char**)data_buffer_in,
+                                               (unsigned int*)data_buffer_out,
+                                               (int*)&buffer_in_write,
+                                               (int*)&buffer_in_read,
+                                               (int*)&buffer_out_write,
+                                               (int*)&buffer_out_read,
+                                               (int*)&packet_length);
+    if(status != SGX_SUCCESS){
+      printf("Error encountered in calling enclave function");
     }
-    packet_data = data;
-    valid = 1;
-    packet_length = length;
+}
+
+int call_process_packet_sgx(unsigned char *data, unsigned int length){
+    int i, rc;
+    static int iterations = 0;
     if(initial_call == false){
-      status = ecall_process_packet(global_eid, (unsigned int*)&valid, (unsigned char**)&packet_data, (unsigned int*)&packet_length);
-      if(status != SGX_SUCCESS){
-          printf("Error encountered in calling enclave function");
-      }
+        rc = pthread_create(&sgx_thread, NULL, init_sgx_thread, NULL);
+        if(rc){
+            printf("Error creating thread: %i\n", rc);
+        } else{
+            initial_call = true;
+            buffer_in_write = 0;
+            buffer_in_read = 0;
+            buffer_out_write = 0;
+            buffer_out_read = 0;
+        }
     }
-//    test_process_packet(data, length);
-/*    printf("Message sha256: 0x");
-    for(i=0; i<SGX_SHA256_HASH_SIZE; i++){
-        printf("%02x", hash[i]);
+    while(buffer_in_write == (buffer_in_read - 1) % 50 ){
+//        printf("Stuck here: %i, %i\n", buffer_in_write, buffer_in_read);
+        __asm__ __volatile__("");
     }
-    printf("\n");*/
+    data_buffer_in[buffer_in_write] = data;
+    packet_length = length;
+    buffer_in_write = (buffer_in_write + 1) % 50;
+    while(buffer_out_read == buffer_out_write){
+//        printf("Stuck here in %i: %i, %i\n", iterations, buffer_out_read, buffer_out_write);
+        __asm__ __volatile__("");
+    }
+    int current_out = data_buffer_out[buffer_out_read];
+    buffer_out_read = (buffer_out_read + 1) % 50;
+    iterations++;
+    return current_out;
 }
 
 void handle_connection(int socket_fd){

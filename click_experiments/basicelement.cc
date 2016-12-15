@@ -19,12 +19,24 @@ BasicElement::BasicElement(){
   }
 }
 
+String BasicElement::sgx_read_handler(Element *e, void *thunk){
+  BasicElement *sgx = (BasicElement*)e;
+  return String(sgx->sgx_sum);
+}
+
+void BasicElement::add_handlers(){
+  add_read_handler("sgx_sum", sgx_read_handler, 0);
+}
+
 void BasicElement::push(int port, Packet *p){
   count++;
 //  cout << "Received packet. Updating count to: "<<count<<endl;
   unsigned char *data = (unsigned char*)p->data();
   unsigned int data_len = p->length();
-  call_process_packet_sgx(data, data_len);
+  int sgx_count = call_process_packet_sgx(data, data_len);
+  // cout << "Count: " << sgx_count << endl;
+  printf("Count: %i\n", sgx_count);
+  sgx_sum += sgx_count;
 
 //  long int response_count = sendData(data, data_len);
 /*  if(response_len != data_len){
@@ -104,7 +116,7 @@ long int BasicElement::sendData(unsigned char *data, unsigned int length){
         close(socket_fd);
 		return -1;
 	}
-    
+
 	rc = send(socket_fd, data, length, 0);
     if(rc < 0){
         printf("Failed to send data\n");

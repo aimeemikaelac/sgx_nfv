@@ -1,5 +1,6 @@
 cnt::Counter();
-src::InfiniteSource(DATA "HELLO", LENGTH 40960, BURST 1);
+src::InfiniteSource(DATA "HELLOOOOOOOOOOO\n", LENGTH 40960, BURST 1);
+//src::RandomSource(LENGTH 40960, BURST 1);
 sink::Discard(BURST 1);
 sgx::BasicElement();
 src -> sgx -> Queue() -> cnt -> sink;
