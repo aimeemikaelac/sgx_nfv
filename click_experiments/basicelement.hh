@@ -21,8 +21,8 @@ private:
   long int sgx_sum = 0;
   int index=0;
   // std::list<Packet*> packet_list;
-  Packet *packet_list[1000];
-  unsigned char* data_list[1000];
+  Packet *packet_list[10000];
+  unsigned char* data_list[10000];
   long int sendData(unsigned char *data, unsigned int length);
 };
 CLICK_ENDDECLS
