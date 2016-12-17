@@ -20,13 +20,7 @@ enclave {
 
 
     trusted {
-        public void ecall_process_packet([user_check]unsigned char** data_in_buffer,
-        								 [user_check]unsigned int *data_out_buffer,
-        								 [user_check]int* buffer_in_write,
-        								 [user_check]int* buffer_in_read,
-        								 [user_check]int* buffer_out_write,
-        								 [user_check]int* buffer_out_read,
-        								 [user_check]int* length);
+        public int ecall_process_packet([user_check]unsigned char* data, unsigned int length);
         public void ecall_process_packet_sha256([user_check] unsigned char *packet_data, unsigned int data_len, [out, size=32] unsigned char *hash_out);
     };
 };

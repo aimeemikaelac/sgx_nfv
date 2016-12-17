@@ -56,6 +56,7 @@
 # define TOKEN_FILENAME   "enclave.token"
 # define ENCLAVE1_FILENAME "enclave1.signed.so"
 
+sgx_enclave_id_t global_eid = 0;
 void run_server();
 void handle_connection(int socket_fd);
 int initialize_enclave();

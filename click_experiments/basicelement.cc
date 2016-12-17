@@ -35,7 +35,17 @@ void BasicElement::push(int port, Packet *p){
   unsigned int data_len = p->length();
   // printf("Received packet pointer data: %p\n", data);
   // int sgx_count = call_process_packet_sgx(data, data_len);
-  sgx_sum += call_process_packet_sgx(data, data_len);
+  // sgx_sum += call_process_packet_sgx(data, data_len);
+  int sgx_return;
+  sgx_status_t status = ecall_process_packet(global_eid,
+                                             &sgx_return,
+                                             data,
+                                             data_len);
+  if(status != SGX_SUCCESS){
+    printf("Error encountered in calling enclave function");
+  }
+  sgx_sum += sgx_return;
+  // return sgx_return;
   // cout << "Count: " << sgx_count << endl;
   // printf("Count: %i\n", sgx_count);
   // sgx_sum += sgx_count;

@@ -1,6 +1,6 @@
 #include "App.h"
 
-sgx_enclave_id_t global_eid = 0;
+
 volatile unsigned char* data_buffer_in[50];
 volatile int buffer_in_write;
 volatile int buffer_in_read;
@@ -118,52 +118,61 @@ void call_process_packet_sgx_sha256(unsigned char *data, unsigned int length){
   }
 }
 
-static void *init_sgx_thread(void *args){
-    sgx_status_t status = ecall_process_packet(global_eid,
-                                               (unsigned char**)data_buffer_in,
-                                               (unsigned int*)data_buffer_out,
-                                               (int*)&buffer_in_write,
-                                               (int*)&buffer_in_read,
-                                               (int*)&buffer_out_write,
-                                               (int*)&buffer_out_read,
-                                               (int*)&packet_length);
-    if(status != SGX_SUCCESS){
-      printf("Error encountered in calling enclave function");
-    }
-}
+// static void *init_sgx_thread(void *args){
+//     sgx_status_t status = ecall_process_packet(global_eid,
+//                                                (unsigned char**)data_buffer_in,
+//                                                (unsigned int*)data_buffer_out,
+//                                                (int*)&buffer_in_write,
+//                                                (int*)&buffer_in_read,
+//                                                (int*)&buffer_out_write,
+//                                                (int*)&buffer_out_read,
+//                                                (int*)&packet_length);
+//     if(status != SGX_SUCCESS){
+//       printf("Error encountered in calling enclave function");
+//     }
+// }
 
 int call_process_packet_sgx(unsigned char *data, unsigned int length){
-    int i, rc;
-    static int iterations = 0;
-    if(initial_call == false){
-        rc = pthread_create(&sgx_thread, NULL, init_sgx_thread, NULL);
-        if(rc){
-            printf("Error creating thread: %i\n", rc);
-        } else{
-            initial_call = true;
-            buffer_in_write = 0;
-            buffer_in_read = 0;
-            buffer_out_write = 0;
-            buffer_out_read = 0;
-        }
-    }
-    while(buffer_in_write == (buffer_in_read - 1) % 50 ){
-//        printf("Stuck here: %i, %i\n", buffer_in_write, buffer_in_read);
-        __asm__ __volatile__("");
-    }
-    data_buffer_in[buffer_in_write] = data;
-    // printf("Enqueueing %p\n", data);
-    packet_length = length;
-    buffer_in_write = (buffer_in_write + 1) % 50;
-    while(buffer_out_read == buffer_out_write){
-//        printf("Stuck here in %i: %i, %i\n", iterations, buffer_out_read, buffer_out_write);
-        __asm__ __volatile__("");
-    }
-    int current_out = data_buffer_out[buffer_out_read];
-    buffer_out_read = (buffer_out_read + 1) % 50;
-    iterations++;
-    // printf("Dequeded val: %i\n", current_out);
-    return current_out;
+//     int i, rc;
+//     static int iterations = 0;
+//     if(initial_call == false){
+//         rc = pthread_create(&sgx_thread, NULL, init_sgx_thread, NULL);
+//         if(rc){
+//             printf("Error creating thread: %i\n", rc);
+//         } else{
+//             initial_call = true;
+//             buffer_in_write = 0;
+//             buffer_in_read = 0;
+//             buffer_out_write = 0;
+//             buffer_out_read = 0;
+//         }
+//     }
+//     while(buffer_in_write == (buffer_in_read - 1) % 50 ){
+// //        printf("Stuck here: %i, %i\n", buffer_in_write, buffer_in_read);
+//         __asm__ __volatile__("");
+//     }
+//     data_buffer_in[buffer_in_write] = data;
+//     // printf("Enqueueing %p\n", data);
+//     packet_length = length;
+//     buffer_in_write = (buffer_in_write + 1) % 50;
+//     while(buffer_out_read == buffer_out_write){
+// //        printf("Stuck here in %i: %i, %i\n", iterations, buffer_out_read, buffer_out_write);
+//         __asm__ __volatile__("");
+//     }
+//     int current_out = data_buffer_out[buffer_out_read];
+//     buffer_out_read = (buffer_out_read + 1) % 50;
+//     iterations++;
+//     // printf("Dequeded val: %i\n", current_out);
+//     return current_out;
+  // int sgx_return;
+  // sgx_status_t status = ecall_process_packet(global_eid,
+  //                                            &sgx_return,
+  //                                            data,
+  //                                            length);
+  // if(status != SGX_SUCCESS){
+  //   printf("Error encountered in calling enclave function");
+  // }
+  // return sgx_return;
 }
 
 void handle_connection(int socket_fd){
