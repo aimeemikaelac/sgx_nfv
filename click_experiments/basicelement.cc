@@ -9,14 +9,63 @@
 #include "App.h"
 CLICK_DECLS
 
+BasicElement *global_ref = NULL;
+pthread_mutex_t callback_mutex = PTHREAD_MUTEX_INITIALIZER;
+
+typedef struct click_packet_queue{
+  Packet *p;
+  long int packet_id;
+  struct click_packet_queue *next;
+} click_packet_queue;
+
+
+click_packet_queue click_packet_queue_head;
+
 using namespace std;
 
+static void enclave_callback(long int result, long int packet_id){
+  pthread_mutex_lock(&callback_mutex);
+  printf("In cs2\n");
+  click_packet_queue *head_copy = &click_packet_queue_head;
+  click_packet_queue *next = head_copy->next;
+  click_packet_queue *prev = head_copy;
+  while(next != NULL){
+    if(next->packet_id == packet_id){
+      break;
+    }
+    prev = next;
+    next = next->next;
+  }
+  pthread_mutex_unlock(&callback_mutex);
+  printf("Out of cs2\n");
+  if(next == NULL){
+    printf("Could not find packet id %li in click packet queue\n", packet_id);
+  } else{
+    printf("Result for packet id %li: %li\n", result);
+    pthread_mutex_lock(&callback_mutex);
+    prev->next = next->next;
+    pthread_mutex_unlock(&callback_mutex);
+    global_ref->output(0).push(next->p);
+    free(next);
+  }
+  printf("Done with callback\n");
+}
+
 BasicElement::BasicElement(){
+  printf("Started constructor\n");
   int ret = initialize_enclave();
   if(ret < 0){
     printf("Initializing enclave failed\n");
     exit(-1);
   }
+  ret = initialize_enclave_threads(enclave_callback);
+  if(ret < 0){
+    printf("Initializing enclave thread failed\n");
+    exit(-1);
+  }
+  click_packet_queue_head.next = NULL;
+  global_ref = this;
+  printf("Finished constructor\n");
 }
 
 String BasicElement::sgx_read_handler(Element *e, void *thunk){
@@ -29,14 +78,15 @@ void BasicElement::add_handlers(){
 }
 
 void BasicElement::push(int port, Packet *p){
+  printf("In push\n");
   count++;
 //  cout << "Received packet. Updating count to: "<<count<<endl;
-  unsigned char *data = (unsigned char*)p->data();
-  unsigned int data_len = p->length();
-  int sgx_count = call_process_packet_sgx(data, data_len);
+  // unsigned char *data = (unsigned char*)p->data();
+  // unsigned int data_len = p->length();
+  // int sgx_count = call_process_packet_sgx(data, data_len);
   // cout << "Count: " << sgx_count << endl;
-  printf("Count: %i\n", sgx_count);
-  sgx_sum += sgx_count;
+//  printf("Count: %i\n", sgx_count);
+  // sgx_sum += sgx_count;
 
 //  long int response_count = sendData(data, data_len);
 /*  if(response_len != data_len){
@@ -45,7 +95,21 @@ void BasicElement::push(int port, Packet *p){
   	output(0).push(p);
   }*/
   //cout << "Count received from processor of 0x0A bytes was: "<<response_count << endl;
-  output(0).push(p);
+  // output(0).push(p);
+  click_packet_queue *new_item = (click_packet_queue*)malloc(sizeof(click_packet_queue));
+  new_item->p = p;
+  new_item->packet_id = packet_id;
+  pthread_mutex_lock(&callback_mutex);
+  printf("In cs\n");
+  new_item->next = click_packet_queue_head.next;
+  printf("In cs2\n");
+  click_packet_queue_head.next = new_item;
+  printf("In cs3\n");
+  pthread_mutex_unlock(&callback_mutex);
+  printf("Out of cs\n");
+  call_process_packet_sgx((unsigned char*)p->data(), p->length(), packet_id);
+  ++packet_id;
+  printf("out of push\n");
 }
 
 /**

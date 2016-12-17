@@ -56,10 +56,35 @@
 # define TOKEN_FILENAME   "enclave.token"
 # define ENCLAVE1_FILENAME "enclave1.signed.so"
 
+typedef struct packet_data {
+  volatile unsigned char* packet_data;
+  unsigned int length;
+  long int result;
+  long int packet_id;
+  volatile struct packet_data *next;
+} packet_data;
+
+typedef struct packet_queue {
+  volatile packet_data *first;
+  volatile packet_data *divider;
+  volatile packet_data *last;
+} packet_queue;
+
+// typedef struct enclave_thread_data {
+//   volatile packet_queue
+// }
+
+typedef void (*callback_function)(long int, long int);
+
+typedef struct output_thread_data {
+  callback_function callback;
+} output_thread_data;
+
 void run_server();
 void handle_connection(int socket_fd);
 int initialize_enclave();
-int call_process_packet_sgx(unsigned char *data, unsigned int length);
+int call_process_packet_sgx(unsigned char *data, unsigned int length, long packet_id);
 void call_process_packet_sgx_sha256(unsigned char *data, unsigned int length);
+int initialize_enclave_threads(callback_function callback);
 
 #endif /* ENCLAVE_ENCLAVE1_APP_APP_H_ */

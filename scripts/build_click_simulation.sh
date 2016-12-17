@@ -34,10 +34,10 @@ cd $DIR/click
 make uninstall
 make clean
 #set environmental variables for SGX simulation
-export CPPFLAGS="-I/opt/intel/sgxsdk/include/ -I$DIR/NFV_Basic_SGX/sgx/enclave_enclave1/untrusted/"
+export CPPFLAGS="-g -I/opt/intel/sgxsdk/include/ -I$DIR/NFV_Basic_SGX/sgx/enclave_enclave1/untrusted/"
 export LDFLAGS="-L$DIR/NFV_Basic_SGX/sgx/enclave_enclave1/ -L/opt/intel/sgxsdk/lib64"
 export LIBS="-lapp -lsgx_urts_sim -lsgx_uae_service_sim -lpthread -lcrypto"
 #build
-./configure --enable-local --prefix=$DIR/click_out
+./configure --enable-local --prefix=$DIR/click_out --enable-valgrind
 make
 make install

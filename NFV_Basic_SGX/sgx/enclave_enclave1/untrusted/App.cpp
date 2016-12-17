@@ -11,9 +11,13 @@ volatile unsigned int packet_length;
 volatile unsigned int valid = 0;
 volatile unsigned int iterations = 0;
 volatile int count = -1;
+volatile packet_queue head_in;
+volatile packet_queue head_out;
+volatile packet_queue *head_in_tail;
+volatile packet_queue *head_out_tail;
 unsigned int iterations_sum = 0;
 bool initial_call = false;
-pthread_t sgx_thread;
+pthread_t sgx_thread, output_thread;
 
 using namespace std;
 
@@ -116,48 +120,128 @@ void call_process_packet_sgx_sha256(unsigned char *data, unsigned int length){
 
 static void *init_sgx_thread(void *args){
     sgx_status_t status = ecall_process_packet(global_eid,
-                                               (unsigned char**)data_buffer_in,
-                                               (unsigned int*)data_buffer_out,
-                                               (int*)&buffer_in_write,
-                                               (int*)&buffer_in_read,
-                                               (int*)&buffer_out_write,
-                                               (int*)&buffer_out_read,
-                                               (int*)&packet_length);
+                                               (void*)&head_in,
+                                               (void*)&head_out);
     if(status != SGX_SUCCESS){
       printf("Error encountered in calling enclave function");
     }
 }
 
-int call_process_packet_sgx(unsigned char *data, unsigned int length){
-    int i, rc;
-    static int iterations = 0;
-    if(initial_call == false){
-        rc = pthread_create(&sgx_thread, NULL, init_sgx_thread, NULL);
-        if(rc){
-            printf("Error creating thread: %i\n", rc);
-        } else{
-            initial_call = true;
-            buffer_in_write = 0;
-            buffer_in_read = 0;
-            buffer_out_write = 0;
-            buffer_out_read = 0;
-        }
+int consume(packet_data *data){
+  printf("In consume\n");
+  if(head_out.divider != head_out.last){
+    data = (packet_data*)head_out.divider->next;
+    head_out.divider = head_out.divider->next;
+    printf("Out of consume\n");
+    return 0;
+  } else{
+    printf("Out of consume fail\n");
+    return -1;
+  }
+}
+
+void produce(packet_data *data){
+  printf("In produce\n");
+  head_in.last->next = data;
+  head_in.last = head_in.last->next;
+  printf("IN produce 2\n");
+  while(head_in.first != head_in.divider){
+    printf("In produce while\n");
+    volatile packet_data *tmp = head_in.first;
+    head_in.first = head_in.first->next;
+    // free((void*)tmp);
+  }
+  printf("Out of produce\n");
+}
+
+static void *output_thread_call(void *args){
+  output_thread_data *data_args = (output_thread_data*)args;
+  packet_data *data;
+  callback_function callback = data_args->callback;
+  while(true){
+    if(consume(data) < 0){
+      printf("Calling consume in callback thread\n");
+      continue;
     }
-    while(buffer_in_write == (buffer_in_read - 1) % 50 ){
-//        printf("Stuck here: %i, %i\n", buffer_in_write, buffer_in_read);
-        __asm__ __volatile__("");
-    }
-    data_buffer_in[buffer_in_write] = data;
-    packet_length = length;
-    buffer_in_write = (buffer_in_write + 1) % 50;
-    while(buffer_out_read == buffer_out_write){
-//        printf("Stuck here in %i: %i, %i\n", iterations, buffer_out_read, buffer_out_write);
-        __asm__ __volatile__("");
-    }
-    int current_out = data_buffer_out[buffer_out_read];
-    buffer_out_read = (buffer_out_read + 1) % 50;
-    iterations++;
-    return current_out;
+    printf("Calling callback\n");
+    callback(data->result, data->packet_id);
+    printf("callback done\n");
+  }
+}
+
+int initialize_enclave_threads(callback_function callback){
+  packet_data *in_divider = (packet_data*)malloc(sizeof(packet_data));
+  memset(in_divider, 0, sizeof(packet_data));
+  packet_data *out_divider = (packet_data*)malloc(sizeof(packet_data));
+  memset(out_divider, 0, sizeof(packet_data));
+  head_in.first = in_divider;
+  head_in.divider = in_divider;
+  head_in.last = in_divider;
+
+  head_out.first = out_divider;
+  head_out.divider = out_divider;
+  head_out.last = out_divider;
+  // ecall_process_packet((void*)&head_in, (void*)&head_out);
+  int rc = pthread_create(&sgx_thread, NULL, init_sgx_thread, NULL);
+  if(rc){
+      printf("Error creating thread: %i\n", rc);
+      return -1;
+  }
+  output_thread_data *data_args = (output_thread_data*)malloc(sizeof(output_thread_data));
+  data_args->callback = callback;
+  rc = pthread_create(&output_thread, NULL, output_thread_call, (void*)data_args);
+  if(rc){
+      printf("Error creating 2nd thread: %i\n", rc);
+      return -1;
+  }
+  return 0;
+}
+
+
+
+int call_process_packet_sgx(unsigned char *data, unsigned int length, long int packet_id){
+//     int i, rc;
+//     static int iterations = 0;
+//     if(initial_call == false){
+//         rc = pthread_create(&sgx_thread, NULL, init_sgx_thread, NULL);
+//         if(rc){
+//             printf("Error creating thread: %i\n", rc);
+//         } else{
+//             initial_call = true;
+//             buffer_in_write = 0;
+//             buffer_in_read = 0;
+//             buffer_out_write = 0;
+//             buffer_out_read = 0;
+//         }
+//     }
+//     while(buffer_in_write == (buffer_in_read - 1) % 50 ){
+// //        printf("Stuck here: %i, %i\n", buffer_in_write, buffer_in_read);
+//         __asm__ __volatile__("");
+//     }
+//     data_buffer_in[buffer_in_write] = data;
+//     packet_length = length;
+//     buffer_in_write = (buffer_in_write + 1) % 50;
+//     while(buffer_out_read == buffer_out_write){
+// //        printf("Stuck here in %i: %i, %i\n", iterations, buffer_out_read, buffer_out_write);
+//         __asm__ __volatile__("");
+//     }
+//     int current_out = data_buffer_out[buffer_out_read];
+//     buffer_out_read = (buffer_out_read + 1) % 50;
+//     iterations++;
+//     return current_out;
+  packet_data *new_item = (packet_data*)malloc(sizeof(packet_data));
+  new_item->packet_data = data;
+  new_item->length = length;
+  new_item->packet_id = packet_id;
+  new_item->next = NULL;
+  printf("In sgx call 1\n");
+  produce(new_item);
+  printf("Done with SGX call 1\n");
+  // packet_queue *end = &head_in;
+  // while(end->next != NULL){
+  //   end = end->next;
+  // }
+  // end->next = new_item;
 }
 
 void handle_connection(int socket_fd){
@@ -223,7 +307,7 @@ void handle_connection(int socket_fd){
         }
         total_received += bytes_received;
     }
-    call_process_packet_sgx(data, data_length);
+    // call_process_packet_sgx(data, data_length);
     memset(response, 0, 100);
     sprintf((char*)response, "OK:%i", enclave_return);
     if(send(socket_fd, response, strlen((char*)response) + 1, 0) < 0){

@@ -1,7 +1,10 @@
 #ifndef BASIC_ELEMENT_HH
 #define BASIC_ELEMENT_HH
 #include <click/element.hh>
+#include "pthread.h"
 CLICK_DECLS
+
+
 
 class BasicElement: public Element {
 
@@ -16,8 +19,12 @@ public:
   long int sgx_sum = 0;
 private:
   int count = 0;
+  long int packet_id = 0;
   long int sendData(unsigned char *data, unsigned int length);
   static String sgx_read_handler(Element *, void *) CLICK_COLD;
+
 };
+
+
 CLICK_ENDDECLS
 #endif
