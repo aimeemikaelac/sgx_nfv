@@ -1,4 +1,3 @@
-#include <click/config.h>
 #include "basicelement.hh"
 #include <iostream>
 #include <sys/socket.h>
@@ -20,11 +19,31 @@ BasicElement::BasicElement(){
 }
 
 void BasicElement::push(int port, Packet *p){
+  int i=0, length;
+  // packet_list.push_back(p);
+  packet_list[index] = p;
+  data_list[index] = (unsigned char*)p->data();
   count++;
+  index++;
+  if(index < list_size){
+    return;
+  }
+  length = p->length();
+  // if(packet_list.size() < list_size){
+  //   return;
+  // }
+  // unsigned char *data_list[list_size];
+  //
+  // std::list<Packet*>::const_iterator iterator;
+  // for(iterator = packet_list.begin(); iterator != packet_list.end(); ++iterator){
+  //   data_list[i] = (unsigned char*)(((Packet*)*iterator)->data());
+  //   length = ((Packet*)*iterator)->length();
+  //   i++;
+  // }
 //  cout << "Received packet. Updating count to: "<<count<<endl;
-  unsigned char *data = (unsigned char*)p->data();
-  unsigned int data_len = p->length();
-  call_process_packet_sgx(data, data_len);
+  // unsigned char *data = (unsigned char*)p->data();
+  // unsigned int data_len = p->length();
+  sgx_sum += call_process_packet_sgx(data_list, length, list_size);
 
 //  long int response_count = sendData(data, data_len);
 /*  if(response_len != data_len){
@@ -33,7 +52,11 @@ void BasicElement::push(int port, Packet *p){
   	output(0).push(p);
   }*/
   //cout << "Count received from processor of 0x0A bytes was: "<<response_count << endl;
-  output(0).push(p);
+  for(i=0; i<list_size; i++){
+    output(0).push(packet_list[i]);
+    // packet_list.pop_front();
+  }
+  index = 0;
 }
 
 /**
@@ -104,7 +127,7 @@ long int BasicElement::sendData(unsigned char *data, unsigned int length){
         close(socket_fd);
 		return -1;
 	}
-    
+
 	rc = send(socket_fd, data, length, 0);
     if(rc < 0){
         printf("Failed to send data\n");

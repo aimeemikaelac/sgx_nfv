@@ -101,22 +101,24 @@ void call_process_packet_sgx_sha256(unsigned char *data, unsigned int length){
   }
 }
 
-void call_process_packet_sgx(unsigned char *data, unsigned int length){
-    int i;
+int call_process_packet_sgx(unsigned char **data, unsigned int length, int count){
+    int i, sgx_return;
     sgx_status_t status;
-    while(valid == 1){
-      printf("valid is 1\n");
-      continue;
-    }
-    packet_data = data;
-    valid = 1;
-    packet_length = length;
-    if(initial_call == false){
-      status = ecall_process_packet(global_eid, (unsigned int*)&valid, (unsigned char**)&packet_data, (unsigned int*)&packet_length);
-      if(status != SGX_SUCCESS){
-          printf("Error encountered in calling enclave function");
-      }
-    }
+    status = ecall_process_packet(global_eid, &sgx_return, data, length, count);
+    return sgx_return;
+    // while(valid == 1){
+    //   printf("valid is 1\n");
+    //   continue;
+    // }
+    // packet_data = data;
+    // valid = 1;
+    // packet_length = length;
+    // if(initial_call == false){
+    //   status = ecall_process_packet(global_eid, (unsigned int*)&valid, (unsigned char**)&packet_data, (unsigned int*)&packet_length);
+    //   if(status != SGX_SUCCESS){
+    //       printf("Error encountered in calling enclave function");
+    //   }
+    // }
 //    test_process_packet(data, length);
 /*    printf("Message sha256: 0x");
     for(i=0; i<SGX_SHA256_HASH_SIZE; i++){
@@ -188,7 +190,7 @@ void handle_connection(int socket_fd){
         }
         total_received += bytes_received;
     }
-    call_process_packet_sgx(data, data_length);
+    // call_process_packet_sgx(data, data_length);
     memset(response, 0, 100);
     sprintf((char*)response, "OK:%i", enclave_return);
     if(send(socket_fd, response, strlen((char*)response) + 1, 0) < 0){
