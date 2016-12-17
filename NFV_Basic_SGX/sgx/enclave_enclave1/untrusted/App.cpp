@@ -34,6 +34,10 @@ void print_error_message(sgx_status_t ret)
     std::cout << "Encountered SGX error: " << ret << std::endl;
 }
 
+void ocall_print_pointer_message(const char* str, void* ptr){
+  printf(str, ptr);
+}
+
 void ocall_print_int_message(char *message, unsigned int val){
     printf(message, val);
 }
@@ -148,6 +152,7 @@ int call_process_packet_sgx(unsigned char *data, unsigned int length){
         __asm__ __volatile__("");
     }
     data_buffer_in[buffer_in_write] = data;
+    // printf("Enqueueing %p\n", data);
     packet_length = length;
     buffer_in_write = (buffer_in_write + 1) % 50;
     while(buffer_out_read == buffer_out_write){
@@ -157,6 +162,7 @@ int call_process_packet_sgx(unsigned char *data, unsigned int length){
     int current_out = data_buffer_out[buffer_out_read];
     buffer_out_read = (buffer_out_read + 1) % 50;
     iterations++;
+    // printf("Dequeded val: %i\n", current_out);
     return current_out;
 }
 

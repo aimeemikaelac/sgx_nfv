@@ -15,9 +15,9 @@ using namespace std;
 BasicElementNoSGX::BasicElementNoSGX(){
 }
 
-void BasicElementNoSGX::call_process_packet_no_sgx(unsigned char *data, unsigned int length){
+int BasicElementNoSGX::call_process_packet_no_sgx(unsigned char *data, unsigned int length){
 //  printf("In packet processing - NO enclave\n");
-  int index=0, count = 0, sequence_len = ceil(length/500);
+  int index=0, count = 0, sequence_len = ceil(length/500), i;
   unsigned char *search_seq = data;
   unsigned char *curr = data;
   while(index<(length-sequence_len)){
@@ -30,6 +30,17 @@ void BasicElementNoSGX::call_process_packet_no_sgx(unsigned char *data, unsigned
       index++;
     }
   }
+  // printf("Processed cound: %i\n", count);
+  return count;
+}
+
+String BasicElementNoSGX::sgx_read_handler(Element *e, void *thunk){
+  BasicElementNoSGX *sgx = (BasicElementNoSGX*)e;
+  return String(sgx->sgx_sum);
+}
+
+void BasicElementNoSGX::add_handlers(){
+  add_read_handler("sgx_sum", sgx_read_handler, 0);
 }
 
 void BasicElementNoSGX::push(int port, Packet *p){
@@ -38,8 +49,9 @@ void BasicElementNoSGX::push(int port, Packet *p){
 //  cout << "Received packet. Updating count to: "<<count<<endl;
   unsigned char *data = (unsigned char*)p->data();
   unsigned int data_len = p->length();
+  // printf("Packet pointer nosgx: %p\n", data);
 //  int response_count = call_process_packet_sgx(data, data_len);
-  BasicElementNoSGX::call_process_packet_no_sgx(data, data_len);
+  sgx_sum += BasicElementNoSGX::call_process_packet_no_sgx(data, data_len);
 /*  printf("Message SHA256: 0x");
   for(i=0; i<SHA256_DIGEST_LENGTH; i++){
     printf("%02x", hash[i]);

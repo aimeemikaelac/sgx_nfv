@@ -50,8 +50,11 @@ void ecall_process_packet(unsigned char** data_in_buffer,
   int i, index=0, count = 0, sequence_len, iteration=0, wait_count=0;// = ceil(length/500);
   unsigned char *search_seq;// = data;
   unsigned char *curr;//= data;
-  unsigned char *data;
-  char buff[100];
+  unsigned char *data_local;
+  volatile unsigned char *data;
+  volatile int* packet_length = length;
+  int local_packet_length;
+  // char buff[100];
   ocall_print("enclave start\n");
 //  volatile int *buffer_in_read_local = buffer_in_read;
 //  volatile int *buffer_in_write_local = buffer_in_write;
@@ -59,29 +62,40 @@ void ecall_process_packet(unsigned char** data_in_buffer,
 //  volatile int *buffer_out_write_local = buffer_out_write;
   while(true){
     count = 0;
+    index = 0;
     while(*((volatile int*)buffer_in_read) == *((volatile int*)buffer_in_write)){
       __asm__ __volatile__("");
     }
     data = data_in_buffer[*buffer_in_read];
     *((volatile int*)buffer_in_read) = (*((volatile int*)buffer_in_read) + 1) % 50;
-//    sequence_len = ceil(*length/500);
-//    search_seq = data;
-//    curr = data;
-//    while(index<(*length-sequence_len)){
-//      if(memcmp(curr, search_seq, sequence_len) == 0){
-//        curr += sequence_len;
-//        index += sequence_len;
-//        count ++;
-//      } else{
-//        curr++;
-//        index++;
-//      }
-//    }
-    for(i=0; i<*length; i++){
-        if(data[i] == 0x0a){
-            count++;
-        }
-    }
+    data_local = (unsigned char*)data;
+    local_packet_length = *packet_length;
+   sequence_len = ceil(local_packet_length/500);
+  //  ocall_print_int_message("Packet length: %i\n", *packet_length);
+  //  ocall_print_pointer_message("Data pointer: %p\n", (void*)data);
+  //  ocall_print_int_message("Sequence length: %i\n", sequence_len);
+  //  for(i=0; i<sequence_len; i++){
+    //  ocall_print_hexbyte(data[i]);
+  //  }
+  //  ocall_print("\n");
+   search_seq = data_local;
+   curr = data_local;
+   while(index<(local_packet_length-sequence_len)){
+     if(memcmp(curr, search_seq, sequence_len) == 0){
+       curr += sequence_len;
+       index += sequence_len;
+       count ++;
+     } else{
+       curr++;
+       index++;
+     }
+   }
+  //  ocall_print_int_message("Enclave count %i\n", count);
+    // for(i=0; i<*length; i++){
+    //     if(data[i] == 0x0a){
+    //         count++;
+    //     }
+    // }
     while(*((volatile int*)buffer_out_write) == (*((volatile int*)buffer_out_read) - 1) % 50){
       __asm__ __volatile__("");
     }

@@ -15,6 +15,7 @@ enclave {
         void ocall_print_hexbyte(unsigned char byteval);
         void ocall_print_int(int val);
         void ocall_print_int_message([in, string]char *message, unsigned int val);
+				void ocall_print_pointer_message([in, string]const char* str, [user_check] void* ptr);
     };
 
 
