@@ -35,7 +35,7 @@ void BasicElement::push(int port, Packet *p){
   unsigned int data_len = p->length();
   int sgx_count = call_process_packet_sgx(data, data_len);
   // cout << "Count: " << sgx_count << endl;
-  printf("Count: %i\n", sgx_count);
+  // printf("Count: %i\n", sgx_count);
   sgx_sum += sgx_count;
 
 //  long int response_count = sendData(data, data_len);
