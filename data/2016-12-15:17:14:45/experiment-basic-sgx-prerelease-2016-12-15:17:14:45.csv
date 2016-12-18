@@ -1,0 +1,3 @@
+Counter Count,Source Count,Sink Count,Counter Byte Count,Counter Packet Rate (packets/s),Counter Bit Rate (bit/s),Counter Byte Rate (bytes/s)
+enclave start
+425184,425184,425184,17415536640,42587.891,13955326000,1744415750
