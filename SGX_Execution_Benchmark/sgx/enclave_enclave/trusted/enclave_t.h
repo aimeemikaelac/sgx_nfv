@@ -17,9 +17,12 @@ extern "C" {
 
 
 int ecall_enclave_sample();
-void ecall_stress(unsigned long long in, unsigned long long in2);
+void ecall_stress();
+void ecall_stress_memory(unsigned char* data, int length);
+void ecall_sha(unsigned char* data, int length, unsigned char* hash_out);
 
 sgx_status_t SGX_CDECL ocall_enclave_sample(const char* str);
+sgx_status_t SGX_CDECL ocall_print(const char* str);
 
 #ifdef __cplusplus
 }

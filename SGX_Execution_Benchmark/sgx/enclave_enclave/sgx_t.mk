@@ -45,23 +45,23 @@ Crypto_Library_Name := sgx_tcrypto
 
 Enclave_Cpp_Files := trusted/enclave.cpp 
 Enclave_C_Files := 
-Enclave_Include_Paths := -IInclude -Itrusted -I$(SGX_SDK)/include -I$(SGX_SDK)/include/tlibc -I$(SGX_SDK)/include/stlport
+Enclave_Include_Paths := -IInclude -Itrusted -I$(SGX_SDK)/include -I$(SGX_SDK)/include/tlibc -I$(SGX_SDK)/include/stlport -I../../../libtomcrypt_out/include
 
 
 Flags_Just_For_C := -Wno-implicit-function-declaration -std=c11
-Common_C_Cpp_Flags := $(SGX_COMMON_CFLAGS) -nostdinc -fvisibility=hidden -fpie -fstack-protector $(Enclave_Include_Paths) -fno-builtin-printf -I.
+Common_C_Cpp_Flags := $(SGX_COMMON_CFLAGS) -nostdinc -fvisibility=hidden -fPIC -fstack-protector $(Enclave_Include_Paths) -fno-builtin-printf -I.
 Enclave_C_Flags := $(Flags_Just_For_C) $(Common_C_Cpp_Flags)
 Enclave_Cpp_Flags :=  $(Common_C_Cpp_Flags) -std=c++11 -nostdinc++ -fno-builtin-printf -I.
 
 Enclave_Cpp_Flags := $(Enclave_Cpp_Flags)  -fno-builtin-printf
 
-Enclave_Link_Flags := $(SGX_COMMON_CFLAGS) -Wl,--no-undefined -nostdlib -nodefaultlibs -nostartfiles -L$(SGX_LIBRARY_PATH) \
+Enclave_Link_Flags := $(SGX_COMMON_CFLAGS) -Wl,--no-undefined -nostdlib -nodefaultlibs -nostartfiles -L$(SGX_LIBRARY_PATH) -L../../../libtomcrypt_out/lib \
 	-Wl,--whole-archive -l$(Trts_Library_Name) -Wl,--no-whole-archive \
 	-Wl,--start-group -lsgx_tstdc -lsgx_tstdcxx -l$(Crypto_Library_Name) -l$(Service_Library_Name) -Wl,--end-group \
 	-Wl,-Bstatic -Wl,-Bsymbolic -Wl,--no-undefined \
 	-Wl,-pie,-eenclave_entry -Wl,--export-dynamic  \
 	-Wl,--defsym,__ImageBase=0 \
-	-Wl,--version-script=trusted/enclave.lds
+	-Wl,--version-script=trusted/enclave.lds -ltomcrypt
 
 Enclave_Cpp_Objects := $(Enclave_Cpp_Files:.cpp=.o)
 Enclave_C_Objects := $(Enclave_C_Files:.c=.o)
@@ -109,7 +109,7 @@ trusted/enclave_t.o: ./trusted/enclave_t.c
 	@echo "CC   <=  $<"
 
 trusted/%.o: trusted/%.cpp
-	@$(CXX) $(Enclave_Cpp_Flags) -c $< -o $@
+	@$(CXX) -fPIC $(Enclave_Cpp_Flags) -c $< -o $@
 	@echo "CXX  <=  $<"
 
 trusted/%.o: trusted/%.c

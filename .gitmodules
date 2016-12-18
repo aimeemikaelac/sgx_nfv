@@ -7,3 +7,9 @@
 [submodule "linux-sgx-driver"]
 	path = linux-sgx-driver
 	url = https://github.com/01org/linux-sgx-driver.git
+[submodule "openssl"]
+	path = openssl
+	url = https://github.com/openssl/openssl.git
+[submodule "libtomcrypt"]
+	path = libtomcrypt
+	url = https://github.com/libtom/libtomcrypt.git
