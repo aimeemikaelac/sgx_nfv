@@ -28,6 +28,9 @@ extern sgx_enclave_id_t global_eid;    /* global enclave id */
 extern "C" {
 #endif
 
+//Disclaimer: SHA256 code taken from http://www.zedwood.com/article/cpp-sha256-function
+//License available in License.txt
+
 class SHA256
 {
 protected:

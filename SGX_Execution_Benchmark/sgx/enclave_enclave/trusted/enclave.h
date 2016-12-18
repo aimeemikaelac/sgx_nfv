@@ -11,6 +11,9 @@ extern "C" {
 
 void printf(const char *fmt, ...);
 
+//Disclaimer: SHA256 code taken from http://www.zedwood.com/article/cpp-sha256-function
+//License available in License.txt
+
 class SHA256
 {
 protected:
