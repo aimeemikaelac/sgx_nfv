@@ -6,7 +6,7 @@
 #include "string.h"
 #include "stdlib.h"
 #include <unistd.h>
-#include "openssl/sha.h"
+#include "App.h"
 CLICK_DECLS
 
 using namespace std;
@@ -14,12 +14,16 @@ using namespace std;
 BasicElementNoSGXSHA256::BasicElementNoSGXSHA256(){
 }
 
-void BasicElementNoSGXSHA256::call_process_packet_no_sgx_sha_256(unsigned char *data, unsigned int length, unsigned char hash[SHA256_DIGEST_LENGTH]){
-  memset(hash, 0, SHA256_DIGEST_LENGTH);
-  SHA256_CTX ctx;
-  SHA256_Init(&ctx);
-  SHA256_Update(&ctx, data, length);
-  SHA256_Final(hash, &ctx);
+void BasicElementNoSGXSHA256::call_process_packet_no_sgx_sha_256(unsigned char *data, unsigned int length, unsigned char hash[SHA256::DIGEST_SIZE]){
+  // memset(hash, 0, SHA256_DIGEST_LENGTH);
+  // SHA256_CTX ctx;
+  // SHA256_Init(&ctx);
+  // SHA256_Update(&ctx, data, length);
+  // SHA256_Final(hash, &ctx);
+  SHA256 digest;
+  digest.init();
+  digest.update(data, length);
+  digest.final(hash);
 }
 
 void BasicElementNoSGXSHA256::push(int port, Packet *p){
@@ -29,7 +33,7 @@ void BasicElementNoSGXSHA256::push(int port, Packet *p){
   unsigned char *data = (unsigned char*)p->data();
   unsigned int data_len = p->length();
 //  int response_count = call_process_packet_sgx(data, data_len);
-  unsigned char hash[SHA256_DIGEST_LENGTH];
+  unsigned char hash[SHA256::DIGEST_SIZE];
   BasicElementNoSGXSHA256::call_process_packet_no_sgx_sha_256(data, data_len, hash);
 /*  printf("Message SHA256: 0x");
   for(i=0; i<SHA256_DIGEST_LENGTH; i++){
@@ -115,7 +119,7 @@ long int BasicElementNoSGXSHA256::sendData(unsigned char *data, unsigned int len
         close(socket_fd);
 		return -1;
 	}
-    
+
 	rc = send(socket_fd, data, length, 0);
     if(rc < 0){
         printf("Failed to send data\n");

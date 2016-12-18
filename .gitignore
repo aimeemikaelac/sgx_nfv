@@ -1,3 +1,5 @@
 click_out/
 logs/
 sgx_tls/
+libtomcrypt_out/
+openssl_out/
