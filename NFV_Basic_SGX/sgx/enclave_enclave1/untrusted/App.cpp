@@ -246,25 +246,31 @@ void call_process_packet_sgx_sha256(unsigned char *data, unsigned int length){
 
 int call_process_packet_no_sgx_test(unsigned char *data, unsigned int length){
   int sequence_len = ceil((double)(length/500));
-  int count = 0;
+  int i;
+  int index = 0;
+  int count=0;
   unsigned char *ptr = data;
-  unsigned char *search_data = data;
-  do{
-    ptr = (unsigned char*)memchr((void*)ptr, search_data[0], sequence_len);
-    if(ptr == NULL){
-      break;
-    }
-    if(memcmp (ptr, search_data, sequence_len) == 0){
-      count++;
-      ptr+= sequence_len;
+  while(index <= (length - sequence_len)){
+    bool found = true;
+    if(ptr[0] != data[index]){
+      index++;
+      continue;
     } else{
-      ptr++;
+      for(i=0; i<sequence_len; i++){
+        if(ptr[i] != data[index + i]){
+          found = false;
+          break;
+        }
+      }
+      if(found){
+        count++;
+        index+=sequence_len;
+      } else{
+        index++;
+      }
     }
-    if(ptr >= (data + length)){
-      break;
-    }
-  } while(true);
-  // printf("Count: %i\n", count);
+  }
+  // ocall_print_int_message("Count: %i\n", count);
   return count;
 }
 
