@@ -8,6 +8,7 @@
 #include <unistd.h>
 #include "openssl/sha.h"
 #include <math.h>
+#include "App.h"
 CLICK_DECLS
 
 using namespace std;
@@ -16,21 +17,26 @@ BasicElementNoSGX::BasicElementNoSGX(){
 }
 
 int BasicElementNoSGX::call_process_packet_no_sgx(unsigned char *data, unsigned int length){
-//  printf("In packet processing - NO enclave\n");
-  int index=0, count = 0, sequence_len = ceil(length/500), i;
-  unsigned char *search_seq = data;
-  unsigned char *curr = data;
-  while(index<(length-sequence_len)){
-    if(memcmp(curr, search_seq, sequence_len) == 0){
-      curr += sequence_len;
-      index += sequence_len;
-      count ++;
-    } else{
-      curr++;
-      index++;
+  int sequence_len = ceil((double)(length/500));
+  int count = 0;
+  unsigned char *ptr = data;
+  unsigned char *search_data = data;
+  do{
+    ptr = (unsigned char*)memchr((void*)ptr, search_data[0], sequence_len);
+    if(ptr == NULL){
+      break;
     }
-  }
-  // printf("Processed cound: %i\n", count);
+    if(memcmp (ptr, search_data, sequence_len) == 0){
+      count++;
+      ptr+= sequence_len;
+    } else{
+      ptr++;
+    }
+    if(ptr >= (data + length)){
+      break;
+    }
+  } while(true);
+  // printf("Count: %i\n", count);
   return count;
 }
 
@@ -51,7 +57,7 @@ void BasicElementNoSGX::push(int port, Packet *p){
   unsigned int data_len = p->length();
   // printf("Packet pointer nosgx: %p\n", data);
 //  int response_count = call_process_packet_sgx(data, data_len);
-  sgx_sum += BasicElementNoSGX::call_process_packet_no_sgx(data, data_len);
+  sgx_sum += call_process_packet_no_sgx_test(data, data_len);
 /*  printf("Message SHA256: 0x");
   for(i=0; i<SHA256_DIGEST_LENGTH; i++){
     printf("%02x", hash[i]);

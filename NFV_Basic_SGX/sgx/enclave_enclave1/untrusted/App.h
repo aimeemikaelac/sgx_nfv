@@ -62,6 +62,7 @@ void handle_connection(int socket_fd);
 int initialize_enclave();
 int call_process_packet_sgx(unsigned char *data, unsigned int length);
 void call_process_packet_sgx_sha256(unsigned char *data, unsigned int length);
+int call_process_packet_no_sgx_test(unsigned char *data, unsigned int length);
 
 //Disclaimer: SHA256 code taken from http://www.zedwood.com/article/cpp-sha256-function
 //License available in License.txt

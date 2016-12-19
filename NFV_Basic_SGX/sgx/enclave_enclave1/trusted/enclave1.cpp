@@ -157,62 +157,25 @@ void ecall_process_packet_sha256(unsigned char* data, unsigned int length, unsig
 }
 
 int ecall_process_packet(unsigned char* data, unsigned int length){
-  int i, index=0, count = 0, sequence_len, iteration=0, wait_count=0;// = ceil(length/500);
-  unsigned char *search_seq;// = data;
-  unsigned char *curr;//= data;
-  // unsigned char *data_local;
-  // volatile unsigned char *data;
-  // volatile int* packet_length = length;
-  // int local_packet_length;
-  // char buff[100];
-  // ocall_print("enclave start\n");
-//  volatile int *buffer_in_read_local = buffer_in_read;
-//  volatile int *buffer_in_write_local = buffer_in_write;
-//  volatile int *buffer_out_read_local = buffer_out_read;
-//  volatile int *buffer_out_write_local = buffer_out_write;
-  // while(true){
-  //   count = 0;
-  //   index = 0;
-    // while(*((volatile int*)buffer_in_read) == *((volatile int*)buffer_in_write)){
-    //   __asm__ __volatile__("");
-    // }
-    // data = data_in_buffer[*buffer_in_read];
-    // *((volatile int*)buffer_in_read) = (*((volatile int*)buffer_in_read) + 1) % 50;
-    // data_local = (unsigned char*)data;
-    // local_packet_length = *packet_length;
-   sequence_len = ceil((double)(length/500));
-  //  ocall_print_int_message("Packet length: %i\n", *packet_length);
-  //  ocall_print_pointer_message("Data pointer: %p\n", (void*)data);
-  //  ocall_print_int_message("Sequence length: %i\n", sequence_len);
-  //  for(i=0; i<sequence_len; i++){
-    //  ocall_print_hexbyte(data[i]);
-  //  }
-  //  ocall_print("\n");
-   search_seq = data;
-   curr = data;
-   while(index<(length-sequence_len)){
-     if(memcmp(curr, search_seq, sequence_len) == 0){
-       curr += sequence_len;
-       index += sequence_len;
-       count ++;
-     } else{
-       curr++;
-       index++;
-     }
-   }
-   return count;
-  //  ocall_print_int_message("Enclave count %i\n", count);
-    // for(i=0; i<*length; i++){
-    //     if(data[i] == 0x0a){
-    //         count++;
-    //     }
-    // }
-    // while(*((volatile int*)buffer_out_write) == (*((volatile int*)buffer_out_read) - 1) % 50){
-    //   __asm__ __volatile__("");
-    // }
-    // data_out_buffer[*buffer_out_write] = count;
-    // *((volatile int*)buffer_out_write) = (*((volatile int*)buffer_out_write) + 1) % 50;
-    // iteration++;
-//    ocall_print_int_message("Current iteration: %i\n", iteration);
-  // }
+  int sequence_len = ceil((double)(length/500));
+  int count = 0;
+  unsigned char *ptr = data;
+  unsigned char *search_data = data;
+  do{
+    ptr = (unsigned char*)memchr((void*)ptr, search_data[0], sequence_len);
+    if(ptr == NULL){
+      break;
+    }
+    if(memcmp (ptr, search_data, sequence_len) == 0){
+      count++;
+      ptr+= sequence_len;
+    } else{
+      ptr++;
+    }
+    if(ptr >= (data + length)){
+      break;
+    }
+  } while(true);
+  // ocall_print_int_message("Count: %i\n", count);
+  return count;
 }

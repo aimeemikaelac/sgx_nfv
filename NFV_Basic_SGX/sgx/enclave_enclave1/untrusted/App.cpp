@@ -244,6 +244,30 @@ void call_process_packet_sgx_sha256(unsigned char *data, unsigned int length){
 //     }
 // }
 
+int call_process_packet_no_sgx_test(unsigned char *data, unsigned int length){
+  int sequence_len = ceil((double)(length/500));
+  int count = 0;
+  unsigned char *ptr = data;
+  unsigned char *search_data = data;
+  do{
+    ptr = (unsigned char*)memchr((void*)ptr, search_data[0], sequence_len);
+    if(ptr == NULL){
+      break;
+    }
+    if(memcmp (ptr, search_data, sequence_len) == 0){
+      count++;
+      ptr+= sequence_len;
+    } else{
+      ptr++;
+    }
+    if(ptr >= (data + length)){
+      break;
+    }
+  } while(true);
+  // printf("Count: %i\n", count);
+  return count;
+}
+
 int call_process_packet_sgx(unsigned char *data, unsigned int length){
 //     int i, rc;
 //     static int iterations = 0;
@@ -276,15 +300,15 @@ int call_process_packet_sgx(unsigned char *data, unsigned int length){
 //     iterations++;
 //     // printf("Dequeded val: %i\n", current_out);
 //     return current_out;
-  // int sgx_return;
-  // sgx_status_t status = ecall_process_packet(global_eid,
-  //                                            &sgx_return,
-  //                                            data,
-  //                                            length);
-  // if(status != SGX_SUCCESS){
-  //   printf("Error encountered in calling enclave function");
-  // }
-  // return sgx_return;
+  int sgx_return;
+  sgx_status_t status = ecall_process_packet(global_eid,
+                                             &sgx_return,
+                                             data,
+                                             length);
+  if(status != SGX_SUCCESS){
+    printf("Error encountered in calling enclave function");
+  }
+  return sgx_return;
 }
 
 void handle_connection(int socket_fd){
