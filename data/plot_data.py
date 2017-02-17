@@ -1,6 +1,9 @@
 #!/usr/bin/python
 
 import pylab
+import matplotlib
+matplotlib.rcParams['pdf.fonttype'] = 42
+matplotlib.rcParams['ps.fonttype'] = 42
 import numpy
 import csv
 import os
@@ -114,6 +117,7 @@ def plot_experiment(EXPERIMENT_DATA, experiment, keep_figure=False, save_separat
         # pylab.show()
         if save_separate:
             pylab.savefig("{}.pdf".format(experiment))
+            pylab.savefig("{}.png".format(experiment))
         width += column_width
         index = index + 1
         pylab.legend()
@@ -129,6 +133,7 @@ def plot_experiment(EXPERIMENT_DATA, experiment, keep_figure=False, save_separat
     pylab.xticks(tick_x, tick_label)
     if not save_separate:
         pylab.savefig("{}.pdf".format(experiment))
+        pylab.savefig("{}.png".format(experiment))
     pylab.show()
 
 if __name__ == "__main__":
